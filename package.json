@@ -7,7 +7,7 @@
   "author": "Yeroon",
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "^2.0.0",
-    "fvtt-types": "^14.366.0-beta.20261001000223",
+    "fvtt-types": "14.366.0-beta.20261001000223",
     "prettier": "^2.8.4",
     "typescript": "^5.9.3"
   },
