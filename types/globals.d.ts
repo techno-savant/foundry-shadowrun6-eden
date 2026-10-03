@@ -14,14 +14,14 @@ declare global {
     ready: never;
   }
   // `game` is typed through the lifecycle interfaces (not the global `Game` alias), so merge there.
-  interface InitGame { sr6: SR6GameNamespace }
-  interface I18nInitGame { sr6: SR6GameNamespace }
-  interface SetupGame { sr6: SR6GameNamespace }
-  interface ReadyGame { sr6: SR6GameNamespace }
+  interface InitGame { sr6: Partial<SR6GameNamespace> }
+  interface I18nInitGame { sr6: Partial<SR6GameNamespace> }
+  interface SetupGame { sr6: Partial<SR6GameNamespace> }
+  interface ReadyGame { sr6: Partial<SR6GameNamespace> }
 }
 
-/** Everything `Shadowrun6.js` assigns to `game.sr6` during `init`. */
-export interface SR6GameNamespace {
+/** Everything `Shadowrun6.js` assigns to `game.sr6` during `init`. Exposed as Partial because init starts from `game.sr6 = {}`; strictNullChecks is off so reads stay typed. */
+interface SR6GameNamespace {
   config: SR6Config;
   datamodels: typeof import("../module/datamodels/_module.mjs");
   documents: typeof import("../module/documents/_module.mjs");
