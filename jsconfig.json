@@ -19,6 +19,7 @@
   "include": [
     "module/**/*.js",
     "module/**/*.mjs",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "types/**/*.js"
   ]
 }
