@@ -52,7 +52,7 @@ Hooks.once("init", async function () {
     registerSystemSettings();
     defineHandlebarHelper();
     
-    game.sr6 = {};
+    game.sr6 = /** @type {import("../types/globals.js").SR6GameNamespace} */ ({});
     game.sr6.config = CONFIG.SR6 = new SR6Config();
     game.sr6.datamodels = datamodels;
     game.sr6.documents = documents;
