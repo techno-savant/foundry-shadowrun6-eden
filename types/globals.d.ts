@@ -21,7 +21,7 @@ declare global {
 }
 
 /** Everything `Shadowrun6.js` assigns to `game.sr6` during `init`. */
-interface SR6GameNamespace {
+export interface SR6GameNamespace {
   config: SR6Config;
   datamodels: typeof import("../module/datamodels/_module.mjs");
   documents: typeof import("../module/documents/_module.mjs");
