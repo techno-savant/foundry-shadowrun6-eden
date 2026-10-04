@@ -123,7 +123,7 @@ async function addUnarmedItems() {
     // Checking if there are actors to Migrate
     game.actors.forEach(actor => {
         if ( 
-            docIsVersionBelow(actor, 3,3,6) && !actor.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed') 
+            docIsVersionBelow(actor, 3,3,6) && !actor.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed')
             && ( actor.type === "Player" || actor.type === "NPC")
            ) {
             migrating = true;
