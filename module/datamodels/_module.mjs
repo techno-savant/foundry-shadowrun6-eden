@@ -25,6 +25,7 @@ export { default as SR6QualityItemData } from './quality-item-data.mjs';
 export { default as SR6ComplexformItemData } from './complexform-item-data.mjs';
 export { default as SR6SpritepowerItemData } from './spritepower-item-data.mjs';
 export { default as SR6SpellItemData } from './spell-item-data.mjs';
+export { default as SR6GearItemData } from './gear-item-data.mjs';
 
 // Export Active Effect
 export { default as SR6ActiveEffectData } from './active-effect-data.mjs';

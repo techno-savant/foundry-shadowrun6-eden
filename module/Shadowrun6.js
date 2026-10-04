@@ -161,7 +161,8 @@ Hooks.once("init", async function () {
         quality: datamodels.SR6QualityItemData,
         complexform: datamodels.SR6ComplexformItemData,
         spritepower: datamodels.SR6SpritepowerItemData,
-        spell: datamodels.SR6SpellItemData
+        spell: datamodels.SR6SpellItemData,
+        gear: datamodels.SR6GearItemData
     });
     CONFIG.Item.defaultType = "gear";
     CONFIG.Item.documentClass = documents.SR6Item;

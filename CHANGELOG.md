@@ -6,6 +6,7 @@
 - All items based on the Genesis template (including the types above) gain Availability and Price fields.
 - An empty (0) page reference on these items is now blank, and book names that are not one of the known books are cleared.
 - Contacts that were saved with the misspelled `loyality` value now load it as Loyalty.
+- Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ## 4.0.9
 

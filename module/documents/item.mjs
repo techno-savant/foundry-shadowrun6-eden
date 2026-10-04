@@ -203,39 +203,11 @@ export default class SR6Item extends Item {
 
   /** @inheritDoc */
   static migrateData(source) {
-    if (typeof source.system?.stun === 'string') source.system.stun = (source.system.stun === "true");
-    if (typeof source.system?.ammocap === 'string') source.system.ammocap = parseInt(source.system.ammocap) || 0;
     if (typeof source.system?.fading === 'string') source.system.fading = parseInt(source.system.fading) || 0;
     if (typeof source.system?.threshold === 'string') source.system.threshold = parseInt(source.system.threshold) || 0;
-    if (typeof source.system?.ammocount === 'string') source.system.ammocount = parseInt(source.system.ammocount) || 0;
-    if (typeof source.system?.priceDef === 'string') source.system.priceDef = ( isNaN(parseInt(source.system.priceDef)) ? parseInt(source.system.price) : parseInt(source.system.priceDef) );
     if (typeof source.system?.dmg === 'string') source.system.dmg = parseInt(source.system.dmg) || 0;
-    if (source.system?.attackRating && typeof source.system?.attackRating[0] === 'string') source.system.attackRating = source.system?.attackRating.map(ar => parseInt(ar));
-    if (typeof source.system?.defense === 'string') source.system.defense = parseInt(source.system.defense) || 0;
-    if (typeof source.system?.capacity === 'string') source.system.capacity = parseInt(source.system.capacity) || 0;
-    if (typeof source.system?.social === 'string') source.system.social = parseInt(source.system.social) || 0;
     if (typeof source.system?.rating === 'string') source.system.rating = parseInt(source.system.rating) || 0;
-    if (typeof source.system?.matrix?.deviceRating === 'string') source.system.matrix.deviceRating = parseInt(source.system.matrix.deviceRating) || 0;
     if (typeof source.system?.level === 'boolean') source.system.level = 1;
-
-    if (source.system?.needsRating === true && source.system.rating === 0) source.system.needsRating = false;
-    if (source.system?.subtype === "IMAGING") source.system.subtype = "OPTICAL";
-
-    // TODO Currently all Gear items have a matrix.deviceRating; with change to DataModel this should only be for Electronic Matrix Devices
-    if (source.type === "gear" && source.system?.devRating !== undefined) {
-      source.system.matrix ??= {};
-      source.system.matrix.deviceRating = parseInt(source.system.devRating) || 2;
-      delete source.system.devRating
-    }
-
-    if (source.type === "gear" && source.system?.isElectronicMatrixDevice) {
-      const matrixCmValue = source.system?.matrix?.matrixCM?.value;
-      if (matrixCmValue === null || matrixCmValue === undefined) {
-        source.system.matrix ??= {};
-        source.system.matrix.matrixCM ??= {};
-        source.system.matrix.matrixCM.value  = Math.ceil(source.system.matrix.deviceRating / 2) + 8;
-      }
-    }
 
     return super.migrateData(source);
   }
