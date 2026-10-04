@@ -2,6 +2,10 @@
 
 ### Data Updates
 - Echo, Focus, Adept Power, Metamagic, Martial Art Technique, Martial Art Style, Lifestyle, Critter Power and Ritual items now use data models; unknown `system` fields on them are no longer kept.
+- Contact, SIN, Skill, Quality, Complex Form, Sprite Power and Spell items now use data models; unknown `system` fields on them are no longer kept.
+- All items based on the Genesis template (including the types above) gain Availability and Price fields.
+- An empty (0) page reference on these items is now blank, and book names that are not one of the known books are cleared.
+- Contacts that were saved with the misspelled `loyality` value now load it as Loyalty.
 
 ## 4.0.9
 

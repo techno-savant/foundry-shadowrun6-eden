@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Signal am intention to murder somebody. Targets a persona that is using VR mode and makes a <strong>Cracking + RES vs. INT + FW</strong> Opposed test. </p><p>If you succeeds, the target gains a disconcerting and mysterious bulge, sore, or wound on their persona. They become link-locked, unable to use the Switch Interface Mode or Hide Matrix Actions, and they require an Opposed test to Jack Out. </p><p>It gets worse. If the target takes Matrix damage from any source, they also suffer an equal number of boxes of biofeedback damage—Physical damage if using hot-sim VR, Stun damage if using cold-sim. </p><p>If you directly damage the target, deal a number of extra boxes equal to the net hits scored on the initial Cracking test. The Death Mark disappears when you stop sustaining it or the target jacks out or reboots.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "cracking",
     "skillSpec": "",
     "oppAttr1": "int",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

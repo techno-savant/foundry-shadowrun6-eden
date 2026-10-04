@@ -62,6 +62,15 @@ export function focusNarrowing(item) {
   }
 }
 
+/** @param {Item.Known} item */
+export function spellNarrowing(item) {
+  if (item.type === "spell") {
+    /** @type {InstanceType<typeof import("../../module/datamodels/spell-item-data.mjs").default>} */
+    const system = item.system;
+    return system;
+  }
+}
+
 /** @param {Actor.Known} actor */
 export function legacyLooseSystem(actor) {
   // Legacy template.json types have a loose `system` until they get a TypeDataModel.

@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Conceal a persona or device to make it invisible to Matrix searches. They can only be found with a Matrix Perception test that is specifically looking for the hidden icon; even then you can make an <strong>Electronics + RES</strong> test, with net hits becoming the threshold for the Matrix Perception test.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "electronics",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

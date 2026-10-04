@@ -13,7 +13,9 @@
     "explain": "Cannot spenmd Edge to resist an infection.",
     "modifier": [],
     "category": "DISADVANTAGE",
-    "level": false
+    "level": 1,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [
     {

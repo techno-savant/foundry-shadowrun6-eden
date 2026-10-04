@@ -13,7 +13,9 @@
     "explain": "Reduce your wound penalty by one",
     "modifier": [],
     "category": "ADVANTAGE",
-    "level": false
+    "level": 1,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [
     {

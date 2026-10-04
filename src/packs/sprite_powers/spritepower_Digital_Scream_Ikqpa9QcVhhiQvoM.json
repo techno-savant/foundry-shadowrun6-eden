@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Send out a wide burst of complex noise that is perceived by everything connected to the Matrix within 100 meters. Make an <strong>Electronics + RES</strong> test, and the area becomes affected by noise equal to the number of hits rolled. </p><p>This fades at the beginning of the next combat round, and once it ends, everything that perceived the scream receives a single file. This file must be provided by the technomancer that commands the sprite as part of the Minor Action required to command it, and it may include encryption and/or a data bomb if desired. </p><p>This power cannot be used while running silently on the Matrix.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "instantaneous",
     "isSustained": false,
     "skill": "electronics",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

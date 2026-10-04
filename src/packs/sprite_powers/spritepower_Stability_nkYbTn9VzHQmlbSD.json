@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>You can use this power on any persona or device for which you have either User or Admin access. Stability prevents malfunctions or accidents from affecting it (including both standard glitches and those induced by the Gremlins or Accident powers). </p><p>Ignore standard glitches and reduce critical glitches to regular glitches.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

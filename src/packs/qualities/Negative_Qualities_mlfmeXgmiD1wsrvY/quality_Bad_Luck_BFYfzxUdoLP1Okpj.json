@@ -13,7 +13,9 @@
     "explain": "You Glitch on 1 and 2's.",
     "modifier": [],
     "category": "DISADVANTAGE",
-    "level": false
+    "level": 1,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [
     {

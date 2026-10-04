@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Overwhelming simsense signals surround the sprite. The sprite makes a <strong>Con (Performance) + RES</strong> test and records the total hits. </p><p>Personas using VR mode within 100 meters may attempt to resist independently using <strong>INT + FW</strong>. Characters who have a knowledge skill related to art or music are more vulnerable and cannot gain or spend Edge to resist this power. </p><p>Agents, IC, and personal assistant commlink apps are entirely unaffected, as are any devices that are not running a persona, but sprites are just as vulnerable as characters with artistic knowledge skills. </p><p>Anyone who does not fully resist your power must pay twice the number of points of Edge for all Edge Boosts and Actions for a number of combat rounds equal to your net hits. </p><p>This applies to all actions, not just Matrix Actions. Jacking out or switching to AR ends the effect immediately. This power can not be used while running silently on the Matrix.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "con",
     "skillSpec": "performance",
     "oppAttr1": "int",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

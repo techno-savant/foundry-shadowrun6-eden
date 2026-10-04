@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Targets a persona or IC and make a <strong>Cracking + RES test vs. INT + Data Processing</strong>. If you score any net hits, the target vanishes from the Matrix, trapped within a bizarre hot sim experience in the Resonance for one combat round for each net hit—even if their device has no hot sim capability.</p><p>This causes IC to crash, but other than wasting their time, it doesn’t harm personas. Some who have experienced this describe having a religious experience, and some latent technomancers have had their Emergence triggered in this way, but most have no words or understanding of the indescribable strangeness.</p><p>If someone is physically disconnected from the Matrix while trapped in the fractal dream, they will suffer severe dumpshock, taking 8 boxes of bio-feedback damage as well as receiving the <strong>Zapped</strong> and <strong>Dazed</strong> conditions for one minute per box of damage taken.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "instantaneous",
     "isSustained": false,
     "skill": "con",
     "skillSpec": "",
     "oppAttr1": "int",
-    "oppAttr2": "d"
+    "oppAttr2": "d",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

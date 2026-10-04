@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Everride control of a device operating on autopilot. Target a device, and make an <strong>Electronics + Level vs. Device Rating + FW </strong>test. </p><p>If you succeed, you gain total control of the device and you can substitute your Level for the Pilot rating of the device.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "instantaneous",
     "isSustained": false,
     "skill": "electronics",
     "skillSpec": "",
     "oppAttr1": "rating",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

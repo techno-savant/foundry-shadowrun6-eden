@@ -154,7 +154,14 @@ Hooks.once("init", async function () {
         martialartstyle: datamodels.SR6MartialartstyleItemData,
         lifestyle: datamodels.SR6LifestyleItemData,
         critterpower: datamodels.SR6CritterpowerItemData,
-        ritual: datamodels.SR6RitualItemData
+        ritual: datamodels.SR6RitualItemData,
+        contact: datamodels.SR6ContactItemData,
+        sin: datamodels.SR6SinItemData,
+        skill: datamodels.SR6SkillItemData,
+        quality: datamodels.SR6QualityItemData,
+        complexform: datamodels.SR6ComplexformItemData,
+        spritepower: datamodels.SR6SpritepowerItemData,
+        spell: datamodels.SR6SpellItemData
     });
     CONFIG.Item.defaultType = "gear";
     CONFIG.Item.documentClass = documents.SR6Item;

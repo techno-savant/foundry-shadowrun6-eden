@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Confuse and suppresse a host. If you are in a host and using this power when the host launches IC, that IC is delayed from launching by (Level / 2) combat rounds. Delayed IC can’t act or be targeted.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {
