@@ -71,6 +71,15 @@ export function spellNarrowing(item) {
   }
 }
 
+/** @param {Item.Known} item */
+export function gearNarrowing(item) {
+  if (item.type === "gear") {
+    /** @type {InstanceType<typeof import("../../module/datamodels/gear-item-data.mjs").default>} */
+    const system = item.system;
+    return system;
+  }
+}
+
 /** @param {Actor.Known} actor */
 export function legacyLooseSystem(actor) {
   // Legacy template.json types have a loose `system` until they get a TypeDataModel.

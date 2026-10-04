@@ -200,7 +200,8 @@
       "quality": { "htmlFields": ["description"] },
       "complexform": { "htmlFields": ["description"] },
       "spritepower": { "htmlFields": ["description"] },
-      "spell": { "htmlFields": ["description"] }
+      "spell": { "htmlFields": ["description"] },
+      "gear": { "htmlFields": ["description", "accessories"] }
     }
   }
 }

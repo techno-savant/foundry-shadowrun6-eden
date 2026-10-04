@@ -26,6 +26,7 @@ import type SR6QualityItemData from "../module/datamodels/quality-item-data.mjs"
 import type SR6ComplexformItemData from "../module/datamodels/complexform-item-data.mjs";
 import type SR6SpritepowerItemData from "../module/datamodels/spritepower-item-data.mjs";
 import type SR6SpellItemData from "../module/datamodels/spell-item-data.mjs";
+import type SR6GearItemData from "../module/datamodels/gear-item-data.mjs";
 import type SR6ActiveEffectDataV14 from "../module/datamodels/active-effect-data-v14.mjs";
 
 // LEGACY: these types come from template.json and have no TypeDataModel yet, so their `system` is loose.
@@ -64,6 +65,7 @@ declare module "fvtt-types/configuration" {
       complexform: typeof SR6ComplexformItemData;
       spritepower: typeof SR6SpritepowerItemData;
       spell: typeof SR6SpellItemData;
+      gear: typeof SR6GearItemData;
     };
     // Types target v14. On Foundry 13 the runtime registers SR6ActiveEffectData instead.
     ActiveEffect: { base: typeof SR6ActiveEffectDataV14 };
@@ -77,9 +79,6 @@ declare module "fvtt-types/configuration" {
       Spirit: LegacySystem;
       Vehicle: LegacySystem;
     };
-    Item: {
-      gear: LegacySystem;
-    };
   }
   interface DataConfig {
     Actor: {
@@ -88,9 +87,6 @@ declare module "fvtt-types/configuration" {
       Critter: LegacySystem;
       Spirit: LegacySystem;
       Vehicle: LegacySystem;
-    };
-    Item: {
-      gear: LegacySystem;
     };
   }
 }
