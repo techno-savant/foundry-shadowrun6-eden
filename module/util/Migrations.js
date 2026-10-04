@@ -76,7 +76,7 @@ async function migrateCombatSpells() {
 
     // Checking if there are items to Migrate
     game.items.forEach(item => {
-        if ( docIsVersionBelow(item, 3,2,1) && item.system.category === "combat" ) {
+        if ( docIsVersionBelow(item, 3,2,1) && /** @type {SR6LegacyItemSystem} */ (item.system).category === "combat" ) {
             migrating = true;
             itemsToMigrate.push(item);
         }
@@ -84,7 +84,7 @@ async function migrateCombatSpells() {
     game.actors.forEach(actor => {
         if ( docIsVersionBelow(actor, 3,2,1)) {
             actor.items.forEach(item => {
-                if ( docIsVersionBelow(item, 3,2,1) && item.system.category === "combat" ) {
+                if ( docIsVersionBelow(item, 3,2,1) && /** @type {SR6LegacyItemSystem} */ (item.system).category === "combat" ) {
                     migrating = true;
                     itemsToMigrate.push(item);
                 }
@@ -123,7 +123,7 @@ async function addUnarmedItems() {
     // Checking if there are actors to Migrate
     game.actors.forEach(actor => {
         if ( 
-            docIsVersionBelow(actor, 3,3,6) && !actor.items.some(item => item.system.genesisID === 'unarmed') 
+            docIsVersionBelow(actor, 3,3,6) && !actor.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed') 
             && ( actor.type === "Player" || actor.type === "NPC")
            ) {
             migrating = true;

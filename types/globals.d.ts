@@ -6,7 +6,7 @@ import type macros from "../module/util/macros.js";
 import type releaseNotes from "../releasenotes/releasenotes.js";
 
 declare global {
-  /** system of an item whose type has no TypeDataModel yet; casts to it are removed in A3. */
+  /** Loose cast for item-system reads; replaced by schema-typed narrowing in A3c. */
   type SR6LegacyItemSystem = Record<string, any>;
   interface CONFIG {
     SR6: SR6Config;
