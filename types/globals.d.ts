@@ -6,8 +6,6 @@ import type macros from "../module/util/macros.js";
 import type releaseNotes from "../releasenotes/releasenotes.js";
 
 declare global {
-  /** Loose cast for item-system reads; replaced by schema-typed narrowing in A3c. */
-  type SR6LegacyItemSystem = Record<string, any>;
   /**
    * Options cast for StringField/HTMLField in schemas. With strictNullChecks off, fvtt-types resolves an absent
    * `choices` to `never`, so a bare StringField types as `""` (blank) or `never`; widening the options restores `string`.
