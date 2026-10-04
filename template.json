@@ -571,21 +571,12 @@
 		"types": [
 			"complexform",
 			"contact",
-			"critterpower",
 			"spritepower",
-			"echo",
 			"gear",
-			"lifestyle",
-			"martialartstyle",
-			"martialarttech",
-			"metamagic",
 			"quality",
 			"sin",
 			"skill",
-			"adeptpower",
-			"spell",
-			"ritual",
-			"focus"
+			"spell"
 		],
 		"templates": {
 			"genesis": {
@@ -621,16 +612,6 @@
 				}
 			}
 		},
-		"adeptpower": {
-			"hasLevel": false,
-			"level": 1,
-			"choice": "",
-			"cost": 0.0,
-			"activation": "",
-			"templates": [
-				"genesis"
-			]
-		},
 		"complexform": {
 			"templates": [
 				"genesis"
@@ -664,26 +645,6 @@
 			"type": "",
 			"description": "",
 			"pronouns": ""
-		},
-		"critterpower": {
-			"templates": [
-				"genesis"
-			],
-			"duration": "instantaneous",
-			"action": "",
-			"type": "physical",
-			"range": "self"
-		},
-		"echo": {
-			"templates": [
-				"genesis"
-			]
-		},
-		"focus": {
-			"templates": [
-				"genesis"
-			],
-			"rating": 1
 		},
 		"gear": {
 			"type": "WEAPON_FIREARMS",
@@ -749,43 +710,6 @@
 				"matrix-device"
 			]
 		},
-		"lifestyle": {
-			"templates": [
-				"genesis"
-			],
-			"type": "low",
-			"paid": 1,
-			"cost" : 2000,
-			"sin": ""
-		},
-		"martialartstyle": {
-			"category": {
-				"grappling": false,
-				"mobility": false,
-				"ranged"  : false,
-				"striking": false,
-				"weapon": false
-			},
-			"templates": [
-				"genesis"
-			]
-		},
-		"martialarttech": {
-			"templates": [
-				"genesis"
-			],
-			"style": "",
-			"choice": ""
-		},
-		"metamagic": {
-			"templates": [
-				"genesis"
-			],
-			"hasLevel": false,
-			"level": 1,
-			"adepts": false,
-			"mages": false
-		},
 		"quality": {
 			"templates": [
 				"genesis",
@@ -793,19 +717,6 @@
 			],
 			"category": "",
 			"level": false
-		},
-		"ritual": {
-			"templates": [
-				"genesis"
-			],
-			"threshold": 5,
-			"features": {
-				"anchored": false,
-				"material_link": false,
-				"minion": false,
-				"spell": false,
-				"spotter": false
-			}
 		},
 		"sin": {
 			"name": "Someone",

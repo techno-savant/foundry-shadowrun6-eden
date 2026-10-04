@@ -1,3 +1,8 @@
+## 4.0.10
+
+### Data Updates
+- Echo, Focus, Adept Power, Metamagic, Martial Art Technique, Martial Art Style, Lifestyle, Critter Power and Ritual items now use data models; unknown `system` fields on them are no longer kept.
+
 ## 4.0.9
 
 ### Bug Fixes
