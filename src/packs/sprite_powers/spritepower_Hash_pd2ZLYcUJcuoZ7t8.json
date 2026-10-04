@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Temporarily protect a file with a unique Resonance algorithm only you can unprotect it. </p><p>If you stops carrying the hashed file, it reverts to normal. If you are destroyed, the hashed file you were carrying is permanently corrupted and cannot be used any more. </p><p>The maximum time you can use this power is (Level x 10) combat rounds.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Tag an icon with an invisible marking that only Resonance-driven entities can see, similar to a Matrix signature. This allows you to secretly leave messages on Matrix objects. </p><p>You can overwrite a watermark with a new one. A watermark can be erased with the Erase Matrix Signature action by a Resonant being; otherwise it lasts as long as the icon does.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "permanent",
     "isSustained": false,
     "skill": "",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

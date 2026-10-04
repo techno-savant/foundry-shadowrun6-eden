@@ -18,6 +18,13 @@ export { default as SR6MartialartstyleItemData } from './martialartstyle-item-da
 export { default as SR6LifestyleItemData } from './lifestyle-item-data.mjs';
 export { default as SR6CritterpowerItemData } from './critterpower-item-data.mjs';
 export { default as SR6RitualItemData } from './ritual-item-data.mjs';
+export { default as SR6ContactItemData } from './contact-item-data.mjs';
+export { default as SR6SinItemData } from './sin-item-data.mjs';
+export { default as SR6SkillItemData } from './skill-item-data.mjs';
+export { default as SR6QualityItemData } from './quality-item-data.mjs';
+export { default as SR6ComplexformItemData } from './complexform-item-data.mjs';
+export { default as SR6SpritepowerItemData } from './spritepower-item-data.mjs';
+export { default as SR6SpellItemData } from './spell-item-data.mjs';
 
 // Export Active Effect
 export { default as SR6ActiveEffectData } from './active-effect-data.mjs';

@@ -13,7 +13,9 @@
     "explain": "All wound modifiers are doubled.",
     "modifier": [],
     "category": "DISADVANTAGE",
-    "level": false
+    "level": 1,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [
     {

@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Lock down a target, preventing it from taking an action. Make a <strong>Cracking + Level vs. WP + FW </strong>test, where success means the target cannot take an action as long as the power is sustained. </p><p>This power takes your entire attention; once you do do something else, the target can act again.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "cracking",
     "skillSpec": "",
     "oppAttr1": "wil",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

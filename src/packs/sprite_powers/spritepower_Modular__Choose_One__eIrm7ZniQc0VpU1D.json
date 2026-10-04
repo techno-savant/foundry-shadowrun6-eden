@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Choose any one sprite power. (<em><strong>see</strong> <strong>Sprite Power Compendium</strong></em>)</p><p>You may change this power by spending 1 task. Swapping a power also requires the sprite to take a Major Action.</p><p>You can swap powers multiple times, but each swap costs 1 task. This task does not include actually using the power. However, if the sprite is already carrying out orders, it does not require an extra task to command it to use its new power within the context of its current instructions.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "special",
     "isSustained": false,
     "skill": "",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

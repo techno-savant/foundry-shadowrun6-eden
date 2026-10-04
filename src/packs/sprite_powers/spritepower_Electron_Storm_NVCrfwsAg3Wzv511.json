@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Engulf a target persona in a corrupting datastreams. If the sprite beats the target in a <strong>Cracking + RES vs. INT + FW</strong> test, the target is enveloped in a hail of pulses. </p><p>With the first successful attack and on each subsequent action you perform while sustaining this power, it inflicts <strong>(Resonance) DV Matrix damage</strong>, resisted as normal. </p><p>The storm also causes 2 levels of noise for the target. If you take any Matrix damage, all of your electron storms end immediately.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "cracking",
     "skillSpec": "",
     "oppAttr1": "int",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [
     {

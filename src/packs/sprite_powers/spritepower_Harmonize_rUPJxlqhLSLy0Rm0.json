@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Harmonize the Matrix and entities present. Make a <strong>Con (Performance) + RES</strong> test. Matrix noise within 100 meters of you is reduced by hits. Even if the source of noise has a rule that it can’t be reduced or negated by any means, this power overcomes that limitation. </p><p>Anyone within 100 meters who can experience the sprite’s performance, whether through AR or VR, or even on speakers and trid projectors, is positively affected. </p><p>Any test made to heal an affected character gains bonus dice equal to the sprite’s hits on the performance test. This includes natural healing, first aid, medkits, healing magic, and even complex forms. </p><p>Any character making repairs gains the same number of bonus dice on their Engineering or Electronics tests to fix Matrix or Physical damage. Sprites, AI, and other Matrix fauna are even more strongly affected, automatically healing one box of damage at the end of every combat round.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "con",
     "skillSpec": "performance",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

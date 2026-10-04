@@ -569,14 +569,7 @@
 	},
 	"Item": {
 		"types": [
-			"complexform",
-			"contact",
-			"spritepower",
-			"gear",
-			"quality",
-			"sin",
-			"skill",
-			"spell"
+			"gear"
 		],
 		"templates": {
 			"genesis": {
@@ -585,19 +578,10 @@
 				"product": "",
 				"page": 0
 			},
-			"skill-value": {
-				"points": 0,
-				"modifier": 0
-			},
 			"dice-pool": {
 				"modifier": 0,
 				"wild"    : false,
 				"pool"    : 0
-			},
-			"quality-value": {
-				"value": 0,
-				"explain": "",
-				"modifier": []
 			},
 			"matrix-device": {
 				"isElectronicMatrixDevice": false,
@@ -611,40 +595,6 @@
 					}
 				}
 			}
-		},
-		"complexform": {
-			"templates": [
-				"genesis"
-			],
-			"duration": "sustained",
-			"fading": 3,
-			"skill": "",
-			"skillSpec": "",
-			"attrib": "res",
-			"threshold": 0,
-			"oppAttr1": "",
-			"oppAttr2": ""
-		},
-		"spritepower": {
-			"templates": [
-				"genesis"
-			],
-			"duration": "sustained",
-			"isSustained": false,
-			"skill": "",
-			"skillSpec": "",
-			"oppAttr1": "",
-			"oppAttr2": "",
-			"dmg": 0
-		},
-		"contact": {
-			"name": "Someone",
-			"rating": 1,
-			"loyalty": 1,
-			"favors": 0,
-			"type": "",
-			"description": "",
-			"pronouns": ""
 		},
 		"gear": {
 			"type": "WEAPON_FIREARMS",
@@ -709,43 +659,6 @@
 				"dice-pool",
 				"matrix-device"
 			]
-		},
-		"quality": {
-			"templates": [
-				"genesis",
-				"quality-value"
-			],
-			"category": "",
-			"level": false
-		},
-		"sin": {
-			"name": "Someone",
-			"quality": "REAL_SIN",
-			"description": ""
-		},
-		"skill": {
-			"templates": [
-				"genesis",
-				"skill-value"
-			]
-		},
-		"spell": {
-			"templates": [
-				"genesis"
-			],
-			"category": "health",
-			"duration": "instantaneous",
-			"drain": 1,
-			"type": "physical",
-			"range": "self",
-			"damage": "physical",
-			"alchemic": false,
-			"multiSense": false,
-			"isOpposed": true,
-			"withEssence": false,
-			"wildDie": false,
-			"isSustained": false,
-			"combatSpellType": "spells_indirect"
 		}
 	}
 }

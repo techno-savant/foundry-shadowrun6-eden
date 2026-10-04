@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>You can evalute the inner workings of an electronic device. You can assist someone using or repairing the device. Make an <strong>Electronics + Level</strong> test; </p><p>They get a +1 die per hit on their dicepool to use (Electronics, Engineering or Piloting only) or repair the item. You cannot do anything else while running Diagnostics.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "sustained",
     "isSustained": false,
     "skill": "electronics",
     "skillSpec": "",
     "oppAttr1": "",
-    "oppAttr2": ""
+    "oppAttr2": "",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

@@ -193,7 +193,14 @@
       "martialartstyle": { "htmlFields": ["description"] },
       "lifestyle": { "htmlFields": ["description"] },
       "critterpower": { "htmlFields": ["description"] },
-      "ritual": { "htmlFields": ["description"] }
+      "ritual": { "htmlFields": ["description"] },
+      "contact": { "htmlFields": ["description"] },
+      "sin": { "htmlFields": ["description"] },
+      "skill": { "htmlFields": ["description"] },
+      "quality": { "htmlFields": ["description"] },
+      "complexform": { "htmlFields": ["description"] },
+      "spritepower": { "htmlFields": ["description"] },
+      "spell": { "htmlFields": ["description"] }
     }
   }
 }

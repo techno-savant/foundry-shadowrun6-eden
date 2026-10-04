@@ -6,14 +6,16 @@
   "system": {
     "genesisID": "",
     "description": "<p>Tag a targer persona with a cookie, so you can track it's Matrix activities. You must succeed in an opposed <strong>Cracking + RES vs. INT + FW</strong> test. If you succeed, the target is unknowingly carrying the cookie file. The file runs silent and is protected with a Rating equal to the Sprite's Level. </p><p>The file logs everything the icon does depending on the net hits: 1 hit provides bare outline, 4 or more a detailed report. The sprite (or its owner) sets a time when the cookie is placed, at that time the cookie transfers itself with all its logs to the sprite if it's still in the Matrix. </p><p>Cookies can be detected with a succesful Matrix Perception by the carrying persona. If identified, they can remove the file's protection and then delete it.</p>",
-    "product": "",
-    "page": 0,
+    "page": null,
     "duration": "instantaneous",
     "isSustained": false,
     "skill": "cracking",
     "skillSpec": "",
     "oppAttr1": "int",
-    "oppAttr2": "f"
+    "oppAttr2": "f",
+    "dmg": 0,
+    "availDef": "1L",
+    "price": 0
   },
   "effects": [],
   "ownership": {

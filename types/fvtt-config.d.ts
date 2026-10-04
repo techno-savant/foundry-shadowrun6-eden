@@ -19,6 +19,13 @@ import type SR6MartialartstyleItemData from "../module/datamodels/martialartstyl
 import type SR6LifestyleItemData from "../module/datamodels/lifestyle-item-data.mjs";
 import type SR6CritterpowerItemData from "../module/datamodels/critterpower-item-data.mjs";
 import type SR6RitualItemData from "../module/datamodels/ritual-item-data.mjs";
+import type SR6ContactItemData from "../module/datamodels/contact-item-data.mjs";
+import type SR6SinItemData from "../module/datamodels/sin-item-data.mjs";
+import type SR6SkillItemData from "../module/datamodels/skill-item-data.mjs";
+import type SR6QualityItemData from "../module/datamodels/quality-item-data.mjs";
+import type SR6ComplexformItemData from "../module/datamodels/complexform-item-data.mjs";
+import type SR6SpritepowerItemData from "../module/datamodels/spritepower-item-data.mjs";
+import type SR6SpellItemData from "../module/datamodels/spell-item-data.mjs";
 import type SR6ActiveEffectDataV14 from "../module/datamodels/active-effect-data-v14.mjs";
 
 // LEGACY: these types come from template.json and have no TypeDataModel yet, so their `system` is loose.
@@ -50,6 +57,13 @@ declare module "fvtt-types/configuration" {
       lifestyle: typeof SR6LifestyleItemData;
       critterpower: typeof SR6CritterpowerItemData;
       ritual: typeof SR6RitualItemData;
+      contact: typeof SR6ContactItemData;
+      sin: typeof SR6SinItemData;
+      skill: typeof SR6SkillItemData;
+      quality: typeof SR6QualityItemData;
+      complexform: typeof SR6ComplexformItemData;
+      spritepower: typeof SR6SpritepowerItemData;
+      spell: typeof SR6SpellItemData;
     };
     // Types target v14. On Foundry 13 the runtime registers SR6ActiveEffectData instead.
     ActiveEffect: { base: typeof SR6ActiveEffectDataV14 };
@@ -64,14 +78,7 @@ declare module "fvtt-types/configuration" {
       Vehicle: LegacySystem;
     };
     Item: {
-      complexform: LegacySystem;
-      contact: LegacySystem;
-      spritepower: LegacySystem;
       gear: LegacySystem;
-      quality: LegacySystem;
-      sin: LegacySystem;
-      skill: LegacySystem;
-      spell: LegacySystem;
     };
   }
   interface DataConfig {
@@ -83,14 +90,7 @@ declare module "fvtt-types/configuration" {
       Vehicle: LegacySystem;
     };
     Item: {
-      complexform: LegacySystem;
-      contact: LegacySystem;
-      spritepower: LegacySystem;
       gear: LegacySystem;
-      quality: LegacySystem;
-      sin: LegacySystem;
-      skill: LegacySystem;
-      spell: LegacySystem;
     };
   }
 }
