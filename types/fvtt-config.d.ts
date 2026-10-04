@@ -10,6 +10,15 @@ import type SR6SpriteActorData from "../module/datamodels/sprite-actor-data.mjs"
 import type SR6HostActorData from "../module/datamodels/host-actor-data.mjs";
 import type SR6ModItemData from "../module/datamodels/mod-item-data.mjs";
 import type SR6SoftwareItemData from "../module/datamodels/software-item-data.mjs";
+import type SR6EchoItemData from "../module/datamodels/echo-item-data.mjs";
+import type SR6FocusItemData from "../module/datamodels/focus-item-data.mjs";
+import type SR6AdeptpowerItemData from "../module/datamodels/adeptpower-item-data.mjs";
+import type SR6MetamagicItemData from "../module/datamodels/metamagic-item-data.mjs";
+import type SR6MartialarttechItemData from "../module/datamodels/martialarttech-item-data.mjs";
+import type SR6MartialartstyleItemData from "../module/datamodels/martialartstyle-item-data.mjs";
+import type SR6LifestyleItemData from "../module/datamodels/lifestyle-item-data.mjs";
+import type SR6CritterpowerItemData from "../module/datamodels/critterpower-item-data.mjs";
+import type SR6RitualItemData from "../module/datamodels/ritual-item-data.mjs";
 import type SR6ActiveEffectDataV14 from "../module/datamodels/active-effect-data-v14.mjs";
 
 // LEGACY: these types come from template.json and have no TypeDataModel yet, so their `system` is loose.
@@ -29,7 +38,19 @@ declare module "fvtt-types/configuration" {
   }
   interface DataModelConfig {
     Actor: { sprite: typeof SR6SpriteActorData; host: typeof SR6HostActorData };
-    Item: { mod: typeof SR6ModItemData; software: typeof SR6SoftwareItemData };
+    Item: {
+      mod: typeof SR6ModItemData;
+      software: typeof SR6SoftwareItemData;
+      echo: typeof SR6EchoItemData;
+      focus: typeof SR6FocusItemData;
+      adeptpower: typeof SR6AdeptpowerItemData;
+      metamagic: typeof SR6MetamagicItemData;
+      martialarttech: typeof SR6MartialarttechItemData;
+      martialartstyle: typeof SR6MartialartstyleItemData;
+      lifestyle: typeof SR6LifestyleItemData;
+      critterpower: typeof SR6CritterpowerItemData;
+      ritual: typeof SR6RitualItemData;
+    };
     // Types target v14. On Foundry 13 the runtime registers SR6ActiveEffectData instead.
     ActiveEffect: { base: typeof SR6ActiveEffectDataV14 };
   }
@@ -45,21 +66,12 @@ declare module "fvtt-types/configuration" {
     Item: {
       complexform: LegacySystem;
       contact: LegacySystem;
-      critterpower: LegacySystem;
       spritepower: LegacySystem;
-      echo: LegacySystem;
       gear: LegacySystem;
-      lifestyle: LegacySystem;
-      martialartstyle: LegacySystem;
-      martialarttech: LegacySystem;
-      metamagic: LegacySystem;
       quality: LegacySystem;
       sin: LegacySystem;
       skill: LegacySystem;
-      adeptpower: LegacySystem;
       spell: LegacySystem;
-      ritual: LegacySystem;
-      focus: LegacySystem;
     };
   }
   interface DataConfig {
@@ -73,21 +85,12 @@ declare module "fvtt-types/configuration" {
     Item: {
       complexform: LegacySystem;
       contact: LegacySystem;
-      critterpower: LegacySystem;
       spritepower: LegacySystem;
-      echo: LegacySystem;
       gear: LegacySystem;
-      lifestyle: LegacySystem;
-      martialartstyle: LegacySystem;
-      martialarttech: LegacySystem;
-      metamagic: LegacySystem;
       quality: LegacySystem;
       sin: LegacySystem;
       skill: LegacySystem;
-      adeptpower: LegacySystem;
       spell: LegacySystem;
-      ritual: LegacySystem;
-      focus: LegacySystem;
     };
   }
 }

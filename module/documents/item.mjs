@@ -41,22 +41,22 @@ export default class SR6Item extends Item {
 
   prepareDerivedData() {
     if (this.type === 'spritepower') {
-      switch (this.system.skill) {
+      switch (/** @type {SR6LegacyItemSystem} */ (this.system).skill) {
         case "electronics":
-            this.system.skillSpec = "complex_forms";
+            /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec = "complex_forms";
             break;
         case "cracking":
-            this.system.skillSpec = "cybercombat";
+            /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec = "cybercombat";
             break;
       }
     }
     else if (this.actor?.type === "Vehicle") {
       if (this.type === "gear") {
-        this.system.skill = "engineering";
-        this.system.skillSpec = "gunnery";
+        /** @type {SR6LegacyItemSystem} */ (this.system).skill = "engineering";
+        /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec = "gunnery";
       }
       else if (this.type === "software") {
-        this.system.type = "AUTOSOFT";
+        /** @type {SR6LegacyItemSystem} */ (this.system).type = "AUTOSOFT";
       }
     }
   }
@@ -164,7 +164,7 @@ export default class SR6Item extends Item {
     }
 
     const GEAR = CONFIG.SR6.GEAR;
-    if ( this.parent && GEAR.SUBTYPES_MATRIX_ACCESS.has(this.system.subtype) ) {
+    if ( this.parent && GEAR.SUBTYPES_MATRIX_ACCESS.has(/** @type {SR6LegacyItemSystem} */ (this.system).subtype) ) {
       await this.parent.updatePersona();
     }
   }
@@ -185,11 +185,11 @@ export default class SR6Item extends Item {
     console.log("SR6E | SR6Item._informInCombatChanges()");
     let msg = "";
 
-    if (changed.system?.ammocount !== undefined && changed.system?.ammocount === this.system.ammocap) {
-      msg = game.i18n.format("shadowrun6.ui.notifications.character_has_reloaded", { character: this.actor.name, weaponName: this.name, ammoType: game.i18n.localize("shadowrun6.ammotypes."+this.system.ammoLoaded) });
+    if (changed.system?.ammocount !== undefined && changed.system?.ammocount === /** @type {SR6LegacyItemSystem} */ (this.system).ammocap) {
+      msg = game.i18n.format("shadowrun6.ui.notifications.character_has_reloaded", { character: this.actor.name, weaponName: this.name, ammoType: game.i18n.localize("shadowrun6.ammotypes."+/** @type {SR6LegacyItemSystem} */ (this.system).ammoLoaded) });
     }
     if (changed.system?.ammoLoaded !== undefined) {
-      msg = game.i18n.format("shadowrun6.ui.notifications.character_has_switched_ammo", { character: this.actor.name, weaponName: this.name, ammoType: game.i18n.localize("shadowrun6.ammotypes."+this.system.ammoLoaded) });
+      msg = game.i18n.format("shadowrun6.ui.notifications.character_has_switched_ammo", { character: this.actor.name, weaponName: this.name, ammoType: game.i18n.localize("shadowrun6.ammotypes."+/** @type {SR6LegacyItemSystem} */ (this.system).ammoLoaded) });
     }
     
     if (msg.length > 0) {
@@ -242,8 +242,8 @@ export default class SR6Item extends Item {
   
   _migrateCleanUp() {
     if (this.calculated === undefined) this.calculated = {};
-    if (this.system?.ammoLoaded === undefined && this.system?.ammocap) this.system.ammoLoaded = 'regular';
-    if (this.system?.ammocap === null || this.system?.ammocap === "") this.system.ammocap = 0;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system)?.ammoLoaded === undefined && /** @type {SR6LegacyItemSystem} */ (this.system)?.ammocap) /** @type {SR6LegacyItemSystem} */ (this.system).ammoLoaded = 'regular';
+    if (/** @type {SR6LegacyItemSystem} */ (this.system)?.ammocap === null || /** @type {SR6LegacyItemSystem} */ (this.system)?.ammocap === "") /** @type {SR6LegacyItemSystem} */ (this.system).ammocap = 0;
   }
 
   /**
@@ -260,9 +260,9 @@ export default class SR6Item extends Item {
   _prepareElectronicMatrixDevice() {
     if (this.type !== 'gear') return;
     const GEAR = CONFIG.SR6.GEAR;
-    const typeConfig = GEAR[this.system.type];
+    const typeConfig = GEAR[/** @type {SR6LegacyItemSystem} */ (this.system).type];
     if (!typeConfig) return;
-    const subtypeConfig = typeConfig.subtypes[this.system.subtype];
+    const subtypeConfig = typeConfig.subtypes[/** @type {SR6LegacyItemSystem} */ (this.system).subtype];
     if (!subtypeConfig) return;
 
     // if (this.system.type === "CYBERWARE") {
@@ -270,53 +270,53 @@ export default class SR6Item extends Item {
     // }
     if (
       subtypeConfig.showMatrixDeviceConfig === CONFIG.SR6.MATRIX_DEVICE_CONFIG.ALWAYS
-      || this.system.matrix.hasWirelessInterface ===  true
-      || this.system.matrix.hasDataCableInterface ===  true
+      || /** @type {SR6LegacyItemSystem} */ (this.system).matrix.hasWirelessInterface ===  true
+      || /** @type {SR6LegacyItemSystem} */ (this.system).matrix.hasDataCableInterface ===  true
     ) {
-      this.system.isElectronicMatrixDevice = true;
+      /** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice = true;
     }
 
-    if (!this.system.isElectronicMatrixDevice) return;
+    if (!/** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice) return;
     console.log("SR6E | SR6Item | preparing Gear item as an Electronic Matrix Device");
     
     if (
-      GEAR.TYPES_WITH_ALWAYS_WIFI.has(this.system.type)
-      || GEAR.SUBTYPES_MATRIX_ACCESS.has(this.system.subtype)
+      GEAR.TYPES_WITH_ALWAYS_WIFI.has(/** @type {SR6LegacyItemSystem} */ (this.system).type)
+      || GEAR.SUBTYPES_MATRIX_ACCESS.has(/** @type {SR6LegacyItemSystem} */ (this.system).subtype)
     ) {
-      this.system.matrix.hasWirelessInterface =  true;
+      /** @type {SR6LegacyItemSystem} */ (this.system).matrix.hasWirelessInterface =  true;
     }
 
-    const deviceRating = Number(this.system.matrix.deviceRating) || 0;
-    const sensor = Number(this.system.sen) || 0;
-    if (this.system.matrix?.matrixCM?.value === null) {
-      this.system.matrix.matrixCM.value = Math.ceil(deviceRating / 2) + 8;
+    const deviceRating = Number(/** @type {SR6LegacyItemSystem} */ (this.system).matrix.deviceRating) || 0;
+    const sensor = Number(/** @type {SR6LegacyItemSystem} */ (this.system).sen) || 0;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).matrix?.matrixCM?.value === null) {
+      /** @type {SR6LegacyItemSystem} */ (this.system).matrix.matrixCM.value = Math.ceil(deviceRating / 2) + 8;
     }
-    const matrixCM = foundry.utils.deepClone(this.system.matrix?.matrixCM ?? {});
+    const matrixCM = foundry.utils.deepClone(/** @type {SR6LegacyItemSystem} */ (this.system).matrix?.matrixCM ?? {});
 
-    if (this.system.type === "VEHICLES" || this.system.type === "DRONES") {
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).type === "VEHICLES" || /** @type {SR6LegacyItemSystem} */ (this.system).type === "DRONES") {
       matrixCM.max = Math.ceil(sensor / 2) + 8;
     } else {
       matrixCM.max = Math.ceil(deviceRating / 2) + 8;
     }
 
-    this.system.matrix.matrixCM = new SR6ConditionMonitorField().initialize(matrixCM);
+    /** @type {SR6LegacyItemSystem} */ (this.system).matrix.matrixCM = new SR6ConditionMonitorField().initialize(matrixCM);
 
   }
 
   get isOnlineOnMatrixWirelessly() {
     return Boolean(
-        this.system.isElectronicMatrixDevice
-        && this.system.matrix.hasWirelessInterface
-        && this.system.matrix.wirelessActive
-        && this.system.matrix.matrixCM.value > 0
+        /** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice
+        && /** @type {SR6LegacyItemSystem} */ (this.system).matrix.hasWirelessInterface
+        && /** @type {SR6LegacyItemSystem} */ (this.system).matrix.wirelessActive
+        && /** @type {SR6LegacyItemSystem} */ (this.system).matrix.matrixCM.value > 0
     );
   }
 
   get isOnlineOnMatrixByDataCable() {
     return Boolean(
-        this.system.isElectronicMatrixDevice
-        && this.system.matrix.hasDataCableInterface
-        && this.system.matrix.matrixCM.value > 0
+        /** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice
+        && /** @type {SR6LegacyItemSystem} */ (this.system).matrix.hasDataCableInterface
+        && /** @type {SR6LegacyItemSystem} */ (this.system).matrix.matrixCM.value > 0
     );
   }
 
@@ -329,43 +329,43 @@ export default class SR6Item extends Item {
   }
 
   get isBricked() {
-    if (this.type !== 'gear' || !this.system.isElectronicMatrixDevice) return;
+    if (this.type !== 'gear' || !/** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice) return;
 
-    return Boolean( this.system.matrix.matrixCM.value === 0 );
+    return Boolean( /** @type {SR6LegacyItemSystem} */ (this.system).matrix.matrixCM.value === 0 );
   }
 
   _addDefaultFireModePenalties() {
-    if (this.system.modes === undefined) return;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).modes === undefined) return;
 
     // Firing Mode PENALTIES
-    this.system.modes.SA_ar_mod = -2;
+    /** @type {SR6LegacyItemSystem} */ (this.system).modes.SA_ar_mod = -2;
     // this.system.modes.SA_dmg_mod = 1;
-    this.system.modes.BF_ar_mod = -4;
+    /** @type {SR6LegacyItemSystem} */ (this.system).modes.BF_ar_mod = -4;
     // this.system.modes.BF_dmg_mod = 2;
-    this.system.modes.FA_ar_mod = -6;
+    /** @type {SR6LegacyItemSystem} */ (this.system).modes.FA_ar_mod = -6;
     // this.system.modes.FA_dmg_mod = 0;
 
     // Used for Item Mods like Smartgun System
-    this.system.modes.dicePoolMod = 0
+    /** @type {SR6LegacyItemSystem} */ (this.system).modes.dicePoolMod = 0
   }
 
   get calculatedAttackRating() {
-    if (this.system.attackRating === undefined || !this.actor) return null;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).attackRating === undefined || !this.actor) return null;
 
-    const attackRating = foundry.utils.deepClone(this.system.attackRating);
+    const attackRating = foundry.utils.deepClone(/** @type {SR6LegacyItemSystem} */ (this.system).attackRating);
 
-    if (this.system.skill === "close_combat" || this.system.skillSpec === "brawling" || this.system.skillSpec === "whips") {
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).skill === "close_combat" || /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec === "brawling" || /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec === "whips") {
       let closeCombatAttackRatingAttribute = this.actor.system.attributes.str.pool;
-      if (this.system.skillSpec === "whips") {
+      if (/** @type {SR6LegacyItemSystem} */ (this.system).skillSpec === "whips") {
         closeCombatAttackRatingAttribute = this.actor.system.attributes.rea.pool;
       }
-      if (game.settings.get(SYSTEM_NAME, "rollStrengthCombat") && this.system.strWeapon === true) {
+      if (game.settings.get(SYSTEM_NAME, "rollStrengthCombat") && /** @type {SR6LegacyItemSystem} */ (this.system).strWeapon === true) {
         closeCombatAttackRatingAttribute = this.actor.system.attributes.agi.pool;
       }
-      if (parseInt(this.system.attackRating[0]) === 0 && this.system.skill === "close_combat" && this.system.skillSpec === "unarmed") {
+      if (parseInt(/** @type {SR6LegacyItemSystem} */ (this.system).attackRating[0]) === 0 && /** @type {SR6LegacyItemSystem} */ (this.system).skill === "close_combat" && /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec === "unarmed") {
         closeCombatAttackRatingAttribute += this.actor.system.attributes.rea.pool;
       }
-      attackRating[0] = parseInt(this.system.attackRating[0]) + parseInt(closeCombatAttackRatingAttribute);
+      attackRating[0] = parseInt(/** @type {SR6LegacyItemSystem} */ (this.system).attackRating[0]) + parseInt(closeCombatAttackRatingAttribute);
     }
 
     attackRating.forEach((rating, index) => {
@@ -382,7 +382,7 @@ export default class SR6Item extends Item {
   }
 
   get ammoLoaded() {
-    let arMod=0, dmgMod=0, stun=false, ammoLoaded = this.system.ammoLoaded;
+    let arMod=0, dmgMod=0, stun=false, ammoLoaded = /** @type {SR6LegacyItemSystem} */ (this.system).ammoLoaded;
 
     switch (ammoLoaded) {
         case "regular":
@@ -416,11 +416,11 @@ export default class SR6Item extends Item {
   }
 
   get calculatedDamage() {
-    if (this.system?.dmg === undefined || !this.actor) return null;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system)?.dmg === undefined || !this.actor) return null;
     
-    let dmg = parseInt(foundry.utils.deepClone(this.system.dmg));
+    let dmg = parseInt(foundry.utils.deepClone(/** @type {SR6LegacyItemSystem} */ (this.system).dmg));
 
-    if (this.system.skill === "close_combat" || this.system.skillSpec === "brawling") {
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).skill === "close_combat" || /** @type {SR6LegacyItemSystem} */ (this.system).skillSpec === "brawling") {
       if (game.settings.get(SYSTEM_NAME, "highStrengthAddsDamage")) {
         dmg += ( this.actor.system.attributes.str.pool >= 7 ) ? 1 : 0;
         dmg += ( this.actor.system.attributes.str.pool >= 10 ) ? 1 : 0;
@@ -433,7 +433,7 @@ export default class SR6Item extends Item {
   }
 
   get calculatedStun() {
-    const stun = this.ammoLoaded.stun || this.system.stun;
+    const stun = this.ammoLoaded.stun || /** @type {SR6LegacyItemSystem} */ (this.system).stun;
     return stun;
   }
 
@@ -443,7 +443,7 @@ export default class SR6Item extends Item {
    */
   getRollData() {
     // Starts off by populating the roll data with a shallow copy of `this.system`
-    const rollData = { ...this.system };
+    const rollData = { .../** @type {SR6LegacyItemSystem} */ (this.system) };
 
     // Quit early if there's no parent actor
     if (!this.actor) return rollData;
@@ -469,7 +469,7 @@ export default class SR6Item extends Item {
     const label = `[${type}] ${this.name}`;
 
     // If it's a rollable power
-    if (this.type === "spritepower" && this.system.skill) {
+    if (this.type === "spritepower" && /** @type {SR6LegacyItemSystem} */ (this.system).skill) {
       const rollConfig = new SpritePowerRoll(item);
       return this.actor.rollResonanceAbility(rollConfig);
     }
@@ -479,7 +479,7 @@ export default class SR6Item extends Item {
       return this.actor.rollItem(rollConfig);
     }
     // If there's no roll data, send a chat message.
-    else if (!this.system.formula) {
+    else if (!/** @type {SR6LegacyItemSystem} */ (this.system).formula) {
       await this.toChat();
     }
     // Otherwise, create a roll and send a chat message from it.
@@ -501,7 +501,7 @@ export default class SR6Item extends Item {
   }
 
   get defaultTestPool() {
-    if (!this.system.skill) return undefined;
+    if (!/** @type {SR6LegacyItemSystem} */ (this.system).skill) return undefined;
 
     if (this.type === "spritepower" || this.type === "complexform") {
       const rollConfig = new SpritePowerRoll(this);
@@ -524,7 +524,7 @@ export default class SR6Item extends Item {
       speaker: speaker,
       rollMode: rollMode,
       flavor: label,
-      content: this.system.description ?? '',
+      content: /** @type {SR6LegacyItemSystem} */ (this.system).description ?? '',
     });
   }
 
@@ -636,16 +636,16 @@ export default class SR6Item extends Item {
   }
   
   #attackRatingToObject() {
-    if (this.system.attackRating === undefined) return;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).attackRating === undefined) return;
 
-    const arObj = {...this.system.attackRating};
-    this.system.attackRating = arObj;
+    const arObj = {.../** @type {SR6LegacyItemSystem} */ (this.system).attackRating};
+    /** @type {SR6LegacyItemSystem} */ (this.system).attackRating = arObj;
   }
   #attackRatingToArray() {
-    if (this.system.attackRating === undefined) return;
+    if (/** @type {SR6LegacyItemSystem} */ (this.system).attackRating === undefined) return;
 
-    const arArray = Object.values(this.system.attackRating);
-    this.system.attackRating = arArray;
+    const arArray = Object.values(/** @type {SR6LegacyItemSystem} */ (this.system).attackRating);
+    /** @type {SR6LegacyItemSystem} */ (this.system).attackRating = arArray;
   }
 
   /**
@@ -679,7 +679,7 @@ export default class SR6Item extends Item {
   }
 
   _updatePanSheets(changed, options) {
-    if (!this.system.isElectronicMatrixDevice) return;
+    if (!/** @type {SR6LegacyItemSystem} */ (this.system).isElectronicMatrixDevice) return;
 
     if (
       changed.system?.matrix?.matrixCM?.value === undefined
@@ -720,16 +720,16 @@ export default class SR6Item extends Item {
 
   get isAccessDevice() {
     if (this.type !== "gear") return false;
-    return CONFIG.SR6.GEAR.SUBTYPES_MATRIX_ACCESS.has(this.system.subtype);
+    return CONFIG.SR6.GEAR.SUBTYPES_MATRIX_ACCESS.has(/** @type {SR6LegacyItemSystem} */ (this.system).subtype);
   }
 
   get isWeapon() {
-    return Boolean(this.system.attackRating !== undefined);
+    return Boolean(/** @type {SR6LegacyItemSystem} */ (this.system).attackRating !== undefined);
   }
 
   get isVehicle() {
     if (this.type !== "gear") return false;
-    return CONFIG.SR6.GEAR.VEHICLE_TYPES.has(this.system.type);
+    return CONFIG.SR6.GEAR.VEHICLE_TYPES.has(/** @type {SR6LegacyItemSystem} */ (this.system).type);
   }
 
   /**

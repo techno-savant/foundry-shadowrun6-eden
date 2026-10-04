@@ -97,7 +97,7 @@ export class SR6MatrixOperationSheet extends MatrixSheetMixin( HandlebarsApplica
     }
 
     get _preparedHud() {
-        const system = this.document.system;
+        const system = /** @type {SR6LegacyItemSystem} */ (this.document.system);
         const hud = { show: true };
 
         hud.matrixCM = SR6MatrixOperationSheet.#cmSlotContext(system.matrix.matrixCM);
@@ -228,7 +228,7 @@ export class SR6MatrixOperationSheet extends MatrixSheetMixin( HandlebarsApplica
         if (conditionMonitor === "matrix") {
             trackColor = "green"
             attr = "system.matrix.matrixCM.value";
-            deltaTrack = newValue - this.document.system.matrix.matrixCM.value;
+            deltaTrack = newValue - /** @type {SR6LegacyItemSystem} */ (this.document.system).matrix.matrixCM.value;
         }
 
         // TODO Showing delta within portrait

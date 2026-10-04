@@ -145,7 +145,16 @@ Hooks.once("init", async function () {
      */
     Object.assign(CONFIG.Item.dataModels, {
         mod: datamodels.SR6ModItemData,
-        software: datamodels.SR6SoftwareItemData
+        software: datamodels.SR6SoftwareItemData,
+        echo: datamodels.SR6EchoItemData,
+        focus: datamodels.SR6FocusItemData,
+        adeptpower: datamodels.SR6AdeptpowerItemData,
+        metamagic: datamodels.SR6MetamagicItemData,
+        martialarttech: datamodels.SR6MartialarttechItemData,
+        martialartstyle: datamodels.SR6MartialartstyleItemData,
+        lifestyle: datamodels.SR6LifestyleItemData,
+        critterpower: datamodels.SR6CritterpowerItemData,
+        ritual: datamodels.SR6RitualItemData
     });
     CONFIG.Item.defaultType = "gear";
     CONFIG.Item.documentClass = documents.SR6Item;

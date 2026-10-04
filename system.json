@@ -184,7 +184,16 @@
     },
     "Item": {
       "mod": {},
-      "software": {}
+      "software": {},
+      "echo": { "htmlFields": ["description"] },
+      "focus": { "htmlFields": ["description"] },
+      "adeptpower": { "htmlFields": ["description"] },
+      "metamagic": { "htmlFields": ["description"] },
+      "martialarttech": { "htmlFields": ["description"] },
+      "martialartstyle": { "htmlFields": ["description"] },
+      "lifestyle": { "htmlFields": ["description"] },
+      "critterpower": { "htmlFields": ["description"] },
+      "ritual": { "htmlFields": ["description"] }
     }
   }
 }
