@@ -1,19 +1,25 @@
 import { sanitizeDescription, sanitizeNumbers } from "./legacy-item-sanitizers.mjs";
 
+/** Schema of the `contact` item type; module-level so checkJs can type the model from it. */
+export function contactItemSchema() {
+    const fields = foundry.data.fields;
+
+    return {
+        name: new fields.StringField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: "Someone"})),
+        rating: new fields.NumberField({required: true, nullable: false, initial: 1}),
+        loyalty: new fields.NumberField({required: true, nullable: false, initial: 1}),
+        favors: new fields.NumberField({required: true, nullable: false, initial: 0}),
+        type: new fields.StringField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: ""})),
+        description: new fields.HTMLField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: ""})),
+        pronouns: new fields.StringField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: ""}))
+    };
+}
+
+/** @extends {foundry.abstract.TypeDataModel<ReturnType<typeof contactItemSchema>, Item.Implementation>} */
 export default class SR6ContactItemData extends foundry.abstract.TypeDataModel {
 
     static defineSchema() {
-        const fields = foundry.data.fields;
-
-        return {
-            name: new fields.StringField({required: true, blank: true, initial: "Someone"}),
-            rating: new fields.NumberField({required: true, nullable: false, initial: 1}),
-            loyalty: new fields.NumberField({required: true, nullable: false, initial: 1}),
-            favors: new fields.NumberField({required: true, nullable: false, initial: 0}),
-            type: new fields.StringField({required: true, blank: true, initial: ""}),
-            description: new fields.HTMLField({required: true, blank: true, initial: ""}),
-            pronouns: new fields.StringField({required: true, blank: true, initial: ""})
-        };
+        return contactItemSchema();
     }
 
     /** @inheritDoc */

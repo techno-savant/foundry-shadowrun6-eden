@@ -1,6 +1,24 @@
-import SR6ModItemData from './mod-item-data.mjs';
+import SR6ModItemData, { modItemSchema } from './mod-item-data.mjs';
 import * as srFields from "./fields/fields.mjs";
 
+/**
+ * Schema of the `software` item type; module-level so checkJs can type the model from it.
+ * @param {{TYPES: object, SUBTYPES: object, MULTITYPES: object}} model The model class, which supplies the choices
+ */
+export function softwareItemSchema(model) {
+    const fields = foundry.data.fields;
+
+    return {
+        ...modItemSchema(model),
+        subtype: new fields.StringField({required: false, choices: model.SUBTYPES}), // Used for Autosofts
+        multiTypes: new fields.SetField(new fields.StringField({required: true, blank: false, choices: model.MULTITYPES})),
+        matrix: new fields.SchemaField({
+            matrixCM: new srFields.SR6ConditionMonitorField(),
+        }),
+    };
+}
+
+/** @extends {SR6ModItemData<ReturnType<typeof softwareItemSchema>>} */
 export default class SR6SoftwareItemData extends SR6ModItemData {
     
     static LOCALIZATION_PREFIXES = [
@@ -17,16 +35,7 @@ export default class SR6SoftwareItemData extends SR6ModItemData {
     });
 
     static defineSchema() {
-        const fields = foundry.data.fields;
-
-        return {
-            ...super.defineSchema(),
-            subtype: new fields.StringField({required: false, choices: this.SUBTYPES}), // Used for Autosofts
-            multiTypes: new fields.SetField(new fields.StringField({required: true, blank: false, choices: this.MULTITYPES})),
-            matrix: new fields.SchemaField({
-                matrixCM: new srFields.SR6ConditionMonitorField(),
-            }),
-        };
+        return softwareItemSchema(this);
     }
 
     /** @inheritDoc */

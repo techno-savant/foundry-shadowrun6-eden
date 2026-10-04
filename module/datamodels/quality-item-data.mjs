@@ -1,18 +1,24 @@
-import SR6GenesisItemData from "./genesis-item-data.mjs";
+import SR6GenesisItemData, { genesisItemSchema } from "./genesis-item-data.mjs";
 
+/** Schema of the `quality` item type; module-level so checkJs can type the model from it. */
+export function qualityItemSchema() {
+    const fields = foundry.data.fields;
+
+    return {
+        ...genesisItemSchema(),
+        value: new fields.NumberField({required: true, nullable: false, initial: 0}),
+        explain: new fields.StringField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: ""})),
+        modifier: new fields.ArrayField(new fields.AnyField()),
+        category: new fields.StringField(/** @type {SR6StringOptions} */ ({required: true, blank: true, initial: ""})),
+        level: new fields.NumberField({required: true, nullable: false, initial: 1})
+    };
+}
+
+/** @extends {SR6GenesisItemData<ReturnType<typeof qualityItemSchema>>} */
 export default class SR6QualityItemData extends SR6GenesisItemData {
 
     static defineSchema() {
-        const fields = foundry.data.fields;
-
-        return {
-            ...super.defineSchema(),
-            value: new fields.NumberField({required: true, nullable: false, initial: 0}),
-            explain: new fields.StringField({required: true, blank: true, initial: ""}),
-            modifier: new fields.ArrayField(new fields.AnyField()),
-            category: new fields.StringField({required: true, blank: true, initial: ""}),
-            level: new fields.NumberField({required: true, nullable: false, initial: 1})
-        };
+        return qualityItemSchema();
     }
 
     /** @inheritDoc */
