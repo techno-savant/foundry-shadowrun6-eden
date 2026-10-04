@@ -26,6 +26,7 @@ export default class SR6TokenDocument extends foundry.documents.TokenDocument {
      * @param {object} options            Additional options which modify the deletion request
      * @param {string} userId             The id of the User requesting the document update
      * @protected
+     * @returns {any} Foundry ignores the return value; typed loosely so SR6Item satisfies Document.Any
      */
     _onDelete(options, userId) {
         super._onDelete(options, userId);

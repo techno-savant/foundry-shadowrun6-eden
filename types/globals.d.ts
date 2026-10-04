@@ -8,6 +8,32 @@ import type releaseNotes from "../releasenotes/releasenotes.js";
 declare global {
   /** Loose cast for item-system reads; replaced by schema-typed narrowing in A3c. */
   type SR6LegacyItemSystem = Record<string, any>;
+  /**
+   * Options cast for StringField/HTMLField in schemas. With strictNullChecks off, fvtt-types resolves an absent
+   * `choices` to `never`, so a bare StringField types as `""` (blank) or `never`; widening the options restores `string`.
+   */
+  type SR6StringOptions = foundry.data.fields.StringField.Options<string>;
+  // Instance types of the item TypeDataModels, for narrowing `item.system` where the code path is type-specific.
+  type SR6BaseItemSystem = import("../module/datamodels/base-item-data.mjs").default<ReturnType<typeof import("../module/datamodels/base-item-data.mjs").baseItemSchema>>;
+  type SR6GearSystem = InstanceType<typeof import("../module/datamodels/gear-item-data.mjs").default>;
+  type SR6ModSystem = InstanceType<typeof import("../module/datamodels/mod-item-data.mjs").default>;
+  type SR6SoftwareSystem = InstanceType<typeof import("../module/datamodels/software-item-data.mjs").default>;
+  type SR6SpellSystem = InstanceType<typeof import("../module/datamodels/spell-item-data.mjs").default>;
+  type SR6SpritepowerSystem = InstanceType<typeof import("../module/datamodels/spritepower-item-data.mjs").default>;
+  type SR6ComplexformSystem = InstanceType<typeof import("../module/datamodels/complexform-item-data.mjs").default>;
+  /** A condition monitor as initialised at prepare time (SR6ConditionMonitor carries no schema types yet). */
+  type SR6PreparedConditionMonitor = Pick<InstanceType<typeof import("../module/datamodels/fields/condition-monitor-data.mjs").default>, "dmg" | "penalty" | "parseDmgToValue"> & { max: number; value: number };
+  /**
+   * Gear system after SR6Item#_prepareElectronicMatrixDevice replaced `matrix.matrixCM` with an initialised condition monitor.
+   * Partial so the stored `{value}` shape stays comparable for the cast (strictNullChecks is off, so reads are unaffected).
+   */
+  type SR6PreparedGearSystem = SR6GearSystem & { matrix: { matrixCM: Partial<SR6PreparedConditionMonitor> } };
+  /** Any item system that has a TypeDataModel (every registered item type). */
+  type SR6ItemSystem = {
+    [K in keyof import("fvtt-types/configuration").DataModelConfig["Item"]]: InstanceType<import("fvtt-types/configuration").DataModelConfig["Item"][K]>
+  }[keyof import("fvtt-types/configuration").DataModelConfig["Item"]];
+  /** parseInt stringifies its argument first, so a number is a valid input (legacy code calls it on NumberField values). */
+  function parseInt(value: number, radix?: number): number;
   interface CONFIG {
     SR6: SR6Config;
   }
