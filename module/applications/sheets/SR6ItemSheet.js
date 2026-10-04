@@ -93,9 +93,9 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
         if (this.actor) {
             for (const item of this.actor.items) {
                 // HTML enriching Gear Mods
-                if (item.system.installedIn?.id === this.item.id) {
+                if (/** @type {SR6LegacyItemSystem} */ (item.system).installedIn?.id === this.item.id) {
                     item.enriched = {};
-                    item.enriched.description = await this.enrichedHTML(item.system.description);
+                    item.enriched.description = await this.enrichedHTML(/** @type {SR6LegacyItemSystem} */ (item.system).description);
                 }
             }
         }

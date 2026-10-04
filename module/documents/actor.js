@@ -1945,7 +1945,7 @@ export default class Shadowrun6Actor extends Actor {
         const vehicleSystem = this.system;
         const vehicleWeapons = this.items.filter(item => item.type == "gear" && isWeapon(item.system));
         vehicleWeapons.forEach((item) => {
-            let system = item.system;
+            let system = /** @type {SR6LegacyItemSystem} */ (item.system);
             let gear = system;
             if (gear.skill && gear.skill != "") {
                 const opMode = vehicleSystem.vehicle.opMode;
@@ -2060,7 +2060,7 @@ export default class Shadowrun6Actor extends Actor {
 
         this.items.forEach((tmpItem) => {
             const item = tmpItem;
-            const itemSystem = item.system;
+            const itemSystem = /** @type {SR6LegacyItemSystem} */ (item.system);
             const GEAR = CONFIG.SR6.GEAR;
             if (item.type == "gear" && GEAR.SUBTYPES_MATRIX_ACCESS.has(itemSystem.subtype) ) {
                 
@@ -3430,7 +3430,7 @@ export default class Shadowrun6Actor extends Actor {
      */
     async _addUnarmed() {        
         if (
-            this.items.some(item => item.system.genesisID === 'unarmed') 
+            this.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed') 
             || ( this.type !== "Player" && this.type !== "NPC")
         ) return;
 
@@ -3468,7 +3468,7 @@ export default class Shadowrun6Actor extends Actor {
     }
 
     get matrixDeviceItems() {
-        return this.items.filter(i => i.system.isElectronicMatrixDevice);
+        return this.items.filter(i => /** @type {SR6LegacyItemSystem} */ (i.system).isElectronicMatrixDevice);
     }
 
     /**
