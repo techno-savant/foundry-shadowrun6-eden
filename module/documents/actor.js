@@ -3430,7 +3430,7 @@ export default class Shadowrun6Actor extends Actor {
      */
     async _addUnarmed() {        
         if (
-            this.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed') 
+            this.items.some(item => /** @type {SR6LegacyItemSystem} */ (item.system).genesisID === 'unarmed')
             || ( this.type !== "Player" && this.type !== "NPC")
         ) return;
 
