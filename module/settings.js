@@ -11,6 +11,16 @@ export const registerSystemSettings = () => {
         default: ""
     });
     /**
+     * Id of the legacy -> V2 actor migration that last ran in this world (see module/migrations/v2/runner.mjs)
+     */
+    /** @type {any} */ (game.settings).register(SYSTEM_NAME, "v2MigrationId", {
+        name: "V2 Actor Migration Id",
+        scope: "world",
+        config: false,
+        type: String,
+        default: ""
+    });
+    /**
      * Register resting variants
      */
     game.settings.register(SYSTEM_NAME, "shadowrunCursors", {
