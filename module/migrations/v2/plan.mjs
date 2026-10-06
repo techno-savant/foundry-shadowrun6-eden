@@ -28,12 +28,6 @@ export function planActor(actorData, table, { ctx, isV2Path } = {}) {
         if (!sameValue(getPath(original, leaf), value)) update[`system.${leaf}`] = value;
     }
     const v1 = { ...result.v1 };
-    for (const [path, value] of Object.entries(result.settle)) {
-        if (hasPath(original, path) && !sameValue(getPath(original, path), value)) {
-            if (!(path in v1)) v1[path] = getPath(original, path);
-            update[`system.${path}`] = value;
-        }
-    }
     const existing = getPath(actorData.flags ?? {}, `${FLAG_SCOPE}.v1`) ?? {};
     for (const [path, value] of Object.entries(v1)) {
         if (!hasPath(existing, path)) update[`flags.${FLAG_SCOPE}.v1.${path}`] = value;
@@ -51,7 +45,8 @@ export function planActor(actorData, table, { ctx, isV2Path } = {}) {
 export function buildEffectKeyMap(table, conversion = {}) {
     const map = { ...conversion };
     for (const entry of table) {
-        if (entry.to && entry.to !== entry.from && ["rename", "transform"].includes(entry.kind)) map[`system.${entry.from}`] = `system.${entry.to}`;
+        // Only plain renames: a transform changes the value's meaning (physical.dmg -> boxes remaining), so an effect on it can't just move
+        if (entry.to && entry.to !== entry.from && entry.kind === "rename") map[`system.${entry.from}`] = `system.${entry.to}`;
     }
     return map;
 }

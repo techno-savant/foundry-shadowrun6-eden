@@ -1,2 +1,4 @@
-/** Rename tables by legacy actor type. Empty in the framework commit; the Critter table arrives with the Critter model. */
-export const TABLES = Object.freeze({});
+import { CRITTER_TABLE } from "./critter.mjs";
+
+/** Rename tables by legacy actor type. V1a ships Critter only, unregistered. */
+export const TABLES = Object.freeze({ Critter: CRITTER_TABLE });

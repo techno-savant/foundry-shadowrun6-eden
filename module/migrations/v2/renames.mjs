@@ -6,7 +6,8 @@ import { FLAG_SCOPE, deletePath, getPath, hasPath, isUnder, leafPaths, setPath }
  * Rules (design Decision 3):
  * - New wins: when both `from` and `to` are present the legacy value is dropped from the in-memory source.
  * - Transforms read the ORIGINAL source (a snapshot) and only run when every `needs` path exists in it. A transform returns
- *   `{value, extra?, v1?}`: `value` goes to `to`, `extra` maps further V2 paths to values, `v1` adds originals to the v1 copy. On a partial
+ *   `{value, extra?, set?, v1?}`: `value` goes to `to`, `extra` maps further V2 paths to values (only when absent), `set` maps
+ *   paths to values that always overwrite (settles an input a same-path transform folded in), `v1` adds originals to the v1 copy. On a partial
  *   update diff they often can't; their `from` then stays in the diff for `translateUpdate`.
  * - The v1 copy: originals of values that changed meaning (transformed, clamped, flagged, unknown) are returned in
  *   `v1`, keyed by legacy path, for the caller to write to flags.shadowrun6-eden.v1. Plain renames are not copied:
@@ -20,12 +21,11 @@ import { FLAG_SCOPE, deletePath, getPath, hasPath, isUnder, leafPaths, setPath }
  * @param {(path: string) => boolean} [options.isV2Path]   True for paths that are valid V2 leaves or prefixes. When
  *     given, legacy leaves the table doesn't cover and V2 doesn't declare are preserved in `v1` and logged, never dropped
  * @param {object} [options.ctx]   Extra data for transforms (for example CONFIG lists)
- * @returns {{source: object, v1: Record<string, any>, clamped: string[], unknown: string[], derived: string[], skipped: string[], settle: Record<string, any>}}
- *     `settle` lists legacy inputs a same-path transform has folded in (for example diceMod); the world migration zeroes them so a second load can't add them again
+ * @returns {{source: object, v1: Record<string, any>, clamped: string[], unknown: string[], derived: string[], skipped: string[]}}
  */
 export function applyV2Renames(source, table, { partial = false, isV2Path, ctx = {} } = {}) {
     const original = structuredClone(source);
-    const result = { source, v1: {}, clamped: [], unknown: [], derived: [], skipped: [], settle: {} };
+    const result = { source, v1: {}, clamped: [], unknown: [], derived: [], skipped: [] };
     const keepV1 = (path, value) => { if (!(path in result.v1)) result.v1[path] = structuredClone(value); };
 
     for (const entry of table) {
@@ -60,16 +60,20 @@ export function applyV2Renames(source, table, { partial = false, isV2Path, ctx =
                 continue;
             }
             const out = entry.transform(original, ctx, { partial });
+            const setsSame = Object.entries(out?.set ?? {}).every(([p, v]) => JSON.stringify(getPath(original, p)) === JSON.stringify(v));
+            if (to === from && out && "value" in out && JSON.stringify(out.value) === JSON.stringify(present) && !out.v1 && !out.extra && setsSame) continue; // already V2: nothing to do
             keepV1(from, present);
             for (const extra of entry.records ?? []) if (hasPath(original, extra)) keepV1(extra, getPath(original, extra));
             if (out?.v1) for (const [k, v] of Object.entries(out.v1)) keepV1(k, v);
             if (out && "value" in out && (to === from || !hasPath(source, to))) setPath(source, to, out.value);
             for (const [path, value] of Object.entries(out?.extra ?? {})) if (!hasPath(source, path)) setPath(source, path, value);
-            Object.assign(result.settle, entry.settle ?? {});
+            for (const [path, value] of Object.entries(out?.set ?? {})) setPath(source, path, value);
             if (to !== from) deletePath(source, from);
             continue;
         }
-        // rename
+        // rename. A target that is the legacy parent of other table sources (attributes.essence.base -> attributes.essence)
+        // is a legacy container, not an existing V2 value.
+        const toIsLegacyContainer = table.some((e) => e.from !== to && isUnder(e.from, to));
         let value = present;
         if (entry.clamp) {
             const fixed = clampValue(present, entry.clamp);
@@ -79,8 +83,9 @@ export function applyV2Renames(source, table, { partial = false, isV2Path, ctx =
             }
             value = fixed.value;
         }
-        if (hasPath(source, to) && to !== from && hasPath(original, to)) {
-            deletePath(source, from); // new wins
+        if (hasPath(source, to) && to !== from && hasPath(original, to) && !toIsLegacyContainer) {
+            if (JSON.stringify(getPath(original, to)) !== JSON.stringify(present)) keepV1(from, present); // new wins, but keep what it superseded
+            deletePath(source, from);
             continue;
         }
         setPath(source, to, value);
