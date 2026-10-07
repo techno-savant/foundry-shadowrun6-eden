@@ -94,7 +94,10 @@ export function buildCritterTable() {
         table.push({ from: `attributes.${v1}.mod`, to: `attributes.${v2}.mod`, kind: "rename", clamp: { min: 0, max: 4, int: true, default: 0 }, note: "V2 mods are 0..4" });
         table.push({ from: `attributes.${v1}.modString`, kind: "derived", note: "display string, recomputed" });
         table.push({ from: `attributes.${v1}.augment`, kind: "derived", note: "never read" });
-        table.push({ from: `attributes.${v1}.pool`, kind: "derived", note: "base + mod, recomputed" });
+        // The upstream conversion sends effects on agi.pool/str.pool to V2's pool, a getter without a setter, which would throw
+        // during prepare. These are attribute-pool overrides (cyberlimbs): V2 has no writable pool, so they have no target (Decision 5a).
+        const noPoolTarget = v1 === "agi" || v1 === "str";
+        table.push({ from: `attributes.${v1}.pool`, kind: "derived", ...(noPoolTarget ? { effectTo: null } : {}), note: noPoolTarget ? "base + mod, recomputed; V2 has no writable pool, so effects on it have no target" : "base + mod, recomputed" });
     }
     table.push({ from: "attributes.mag.min", kind: "derived", note: "vestigial minimum, never read" });
     table.push({ from: "attributes.mag.initiation", kind: "flag", note: "no V2 home yet; V1b decides" });

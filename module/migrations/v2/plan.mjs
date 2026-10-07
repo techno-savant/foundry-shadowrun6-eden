@@ -36,10 +36,11 @@ export function planActor(actorData, table, { ctx, isV2Path } = {}) {
 }
 
 /**
- * Build the effect key map: extra upstream conversions (CONFIG.SR6.EFFECT_CONVERSION_TOV2) first, then the table. A `keep`
- * entry overrides them (so `initiative.<k>.mod` stays `.mod` instead of the generic `.rank`), and an `effectTo` moves
- * effects on a flagged value to its modifier bag; a `rename` entry only fills keys the conversion doesn't know.
- * `null` means "no target": the key is left alone and logged by planEffect.
+ * Build the effect key map. Precedence (design Decision 5a): an explicit `effectTo` (including `null`) wins, then a `keep`
+ * entry, then the upstream conversion (CONFIG.SR6.EFFECT_CONVERSION_TOV2), and a `rename` entry fills only the keys neither
+ * names. A conversion says what an effect MODIFIES (usually a modifier); a data rename says where a stored value LIVES, so a
+ * data rename never overrides the conversion (edge.max stays `edge.mod`, not `edge.rank`).
+ * `null` means "no target": planEffect leaves the key alone and logs it. `key-coverage --targets` guards the final map.
  * @param {object[]} table
  * @param {Record<string, string>} [conversion]
  * @returns {Record<string, string|null>}
@@ -51,8 +52,7 @@ export function buildEffectKeyMap(table, conversion = {}) {
         if (entry.effectTo !== undefined) map[key] = entry.effectTo === null ? null : `system.${entry.effectTo}`;
         // Only plain renames and keeps: a transform changes the value's meaning (physical.dmg -> boxes remaining), so an effect on it can't just move
         else if (entry.kind === "keep") map[key] = key;
-        // A rename fills a gap but doesn't override upstream's conversion: it maps edge.max to edge.mod (an effect adds to the
-        // modifier), where the data rename edge.max -> edge.rank would turn the effect into a change of the rating
+        // A rename only fills a gap in the conversion (Decision 5a)
         else if (entry.kind === "rename" && entry.to && !(key in map)) map[key] = `system.${entry.to}`;
     }
     return map;
