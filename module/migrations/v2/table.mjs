@@ -3,7 +3,7 @@
  * framework shares. Nothing in here touches Foundry, so the rig tools can import it in plain Node.
  *
  * A table is an ordered array of entries:
- *   { from, to?, kind, transform?, needs?, clamp?, records?, note }
+ *   { from, to?, kind, transform?, translate?, needs?, clamp?, records?, effectTo?, note }
  * `from` and `to` are paths relative to `system` (dotted). `kind` is one of KINDS:
  *   rename    the value is moved unchanged (optionally coerced/clamped, see `clamp`)
  *   transform computed by `transform(source, ctx)` from the ORIGINAL source; only runs when every `needs` path exists
@@ -13,6 +13,9 @@
  * `clamp` is { min?, max?, int?, default? }: numbers are coerced, rounded (int), clamped, and the original is
  * kept in the v1 copy whenever the value had to change.
  * `records` lists extra legacy paths whose originals a transform folds in; they go to the v1 copy too.
+ * `needs` entries are paths that must exist; an array entry means any one of them (a legacy path or its V2 name).
+ * `effectTo` is where an ACTIVE EFFECT key on `from` moves, when that differs from the data (a flag entry's value has no V2
+ * home, but effects can still add to its in-memory modifier bag). `effectTo: null` means effects on it have no target.
  */
 
 export const KINDS = Object.freeze(["rename", "transform", "keep", "flag", "derived"]);

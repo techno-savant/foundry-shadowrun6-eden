@@ -1,4 +1,4 @@
-import { FLAG_SCOPE, getPath, hasPath, leafPaths } from "./table.mjs";
+import { FLAG_SCOPE, getPath, hasPath, leafPaths, setPath } from "./table.mjs";
 import { applyV2Renames } from "./renames.mjs";
 
 /**
@@ -36,17 +36,24 @@ export function planActor(actorData, table, { ctx, isV2Path } = {}) {
 }
 
 /**
- * Build the effect key map: every legacy `system.<from>` that moves, plus extra upstream conversions
- * (CONFIG.SR6.EFFECT_CONVERSION_TOV2). The table wins where both name a key.
+ * Build the effect key map: extra upstream conversions (CONFIG.SR6.EFFECT_CONVERSION_TOV2) first, then the table. A `keep`
+ * entry overrides them (so `initiative.<k>.mod` stays `.mod` instead of the generic `.rank`), and an `effectTo` moves
+ * effects on a flagged value to its modifier bag; a `rename` entry only fills keys the conversion doesn't know.
+ * `null` means "no target": the key is left alone and logged by planEffect.
  * @param {object[]} table
  * @param {Record<string, string>} [conversion]
- * @returns {Record<string, string>}
+ * @returns {Record<string, string|null>}
  */
 export function buildEffectKeyMap(table, conversion = {}) {
     const map = { ...conversion };
     for (const entry of table) {
-        // Only plain renames: a transform changes the value's meaning (physical.dmg -> boxes remaining), so an effect on it can't just move
-        if (entry.to && entry.to !== entry.from && entry.kind === "rename") map[`system.${entry.from}`] = `system.${entry.to}`;
+        const key = `system.${entry.from}`;
+        if (entry.effectTo !== undefined) map[key] = entry.effectTo === null ? null : `system.${entry.effectTo}`;
+        // Only plain renames and keeps: a transform changes the value's meaning (physical.dmg -> boxes remaining), so an effect on it can't just move
+        else if (entry.kind === "keep") map[key] = key;
+        // A rename fills a gap but doesn't override upstream's conversion: it maps edge.max to edge.mod (an effect adds to the
+        // modifier), where the data rename edge.max -> edge.rank would turn the effect into a change of the rating
+        else if (entry.kind === "rename" && entry.to && !(key in map)) map[key] = `system.${entry.to}`;
     }
     return map;
 }
@@ -57,8 +64,12 @@ export function buildEffectKeyMap(table, conversion = {}) {
  */
 export function planEffect(effectData, keyMap) {
     const changes = effectData.changes ?? [];
-    if (!changes.some((c) => keyMap[c.key] !== undefined && keyMap[c.key] !== c.key)) return null;
-    const update = { changes: changes.map((c) => ({ ...c, key: keyMap[c.key] ?? c.key })) };
+    const moved = (key) => typeof keyMap[key] === "string" && keyMap[key] !== key;
+    for (const change of changes) {
+        if (keyMap[change.key] === null) console.warn(`SR6E | v2 migration: effect "${effectData.name}" changes ${change.key}, which has no V2 target; left as is`);
+    }
+    if (!changes.some((c) => moved(c.key))) return null;
+    const update = { changes: changes.map((c) => ({ ...c, key: moved(c.key) ? keyMap[c.key] : c.key })) };
     if (!hasPath(effectData.flags ?? {}, `${FLAG_SCOPE}.v1Changes`)) update[`flags.${FLAG_SCOPE}.v1Changes`] = structuredClone(changes);
     return { update };
 }
@@ -85,19 +96,38 @@ export function planTokenBars(tokenData) {
 
 /**
  * Plan an unlinked token's delta: rewrite old-name keys inside `delta.system`, so a delta never carries old keys
- * that a rebuilt synthetic actor would merge over the migrated base.
+ * that a rebuilt synthetic actor would merge over the migrated base. Transforms a partial delta can't run alone
+ * (`physical.dmg` needs the monitor's max, which comes from BOD) are computed on the base actor's data merged with
+ * the delta, so the token's own damage is kept (design Decision 5).
  * @param {object} deltaSystem
  * @param {object[]} table
- * @param {{ctx?: object, isV2Path?: (path: string) => boolean}} [options]
+ * @param {{ctx?: object, isV2Path?: (path: string) => boolean, base?: object}} [options]   `base` is the base actor's system source
  * @returns {{update: Record<string, any>}|null}
  */
-export function planDelta(deltaSystem, table, { ctx, isV2Path } = {}) {
+export function planDelta(deltaSystem, table, { ctx, isV2Path, base } = {}) {
     if (!deltaSystem || !Object.keys(deltaSystem).length) return null;
     const result = applyV2Renames(structuredClone(deltaSystem), table, { partial: true, ctx, isV2Path });
+    if (base && result.skipped.length) {
+        const merged = mergePlain(structuredClone(base), structuredClone(deltaSystem));
+        for (const entry of table) {
+            if (entry.kind !== "transform" || !result.skipped.includes(entry.from) || !entry.to) continue;
+            const out = entry.transform(merged, ctx ?? {}, { partial: false });
+            if (out && "value" in out && !hasPath(result.source, entry.to)) setPath(result.source, entry.to, out.value);
+        }
+    }
     const update = {};
     for (const leaf of leafPaths(result.source)) {
         const value = getPath(result.source, leaf);
         if (!sameValue(getPath(deltaSystem, leaf), value)) update[`delta.system.${leaf}`] = value;
     }
     return Object.keys(update).length ? { update } : null;
+}
+
+/** Deep-merge plain objects (b over a), like Foundry's mergeObject for the data we handle here. */
+function mergePlain(a, b) {
+    for (const [key, value] of Object.entries(b)) {
+        if (value && typeof value === "object" && !Array.isArray(value) && a[key] && typeof a[key] === "object") mergePlain(a[key], value);
+        else a[key] = value;
+    }
+    return a;
 }

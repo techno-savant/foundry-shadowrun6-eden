@@ -26,10 +26,14 @@ const num = (value, dflt = 0) => {
     return Number.isFinite(n) ? n : dflt;
 };
 
-/** Legacy attribute pool: max(0, base + min(4, mod)), with the base forced to at least 1 (actor.js:1027-1043). */
+/**
+ * Legacy attribute pool: max(0, base + min(4, mod)), with the base forced to at least 1 (actor.js:1027-1043).
+ * Reads the legacy keys, or the V2 `rank`/`mod` when the source is already V2 (a token delta's base actor).
+ */
 const legacyPool = (src, id) => {
-    const base = Math.max(1, num(getPath(src, `attributes.${id}.base`), 1));
-    return Math.max(0, base + Math.min(4, num(getPath(src, `attributes.${id}.mod`), 0)));
+    const v2 = Object.values(ATTRIBUTES).includes(id) ? id : ATTRIBUTES[id];
+    const base = Math.max(1, num(getPath(src, `attributes.${id}.base`) ?? getPath(src, `attributes.${v2}.rank`), 1));
+    return Math.max(0, base + Math.min(4, num(getPath(src, `attributes.${id}.mod`) ?? getPath(src, `attributes.${v2}.mod`), 0)));
 };
 
 /** Normalise a free-text specialization to the id form skill_special uses ("Free Fall" -> "free_fall"). */
@@ -96,7 +100,7 @@ export function buildCritterTable() {
     table.push({ from: "attributes.mag.initiation", kind: "flag", note: "no V2 home yet; V1b decides" });
     table.push({ from: "attributes.res.submersion", kind: "flag", note: "no V2 home yet; V1b decides" });
     table.push({ from: "attributes.essence.base", to: "attributes.essence", kind: "rename", clamp: { min: 0, default: 6 }, note: "essence is a decimal value" });
-    table.push({ from: "attributes.essence.mod", kind: "flag", note: "V2 essence has no mod; V1b decides" });
+    table.push({ from: "attributes.essence.mod", kind: "flag", effectTo: null, note: "V2 essence has no mod, so an effect on it has no target; it is left as is and logged" });
     table.push({ from: "attributes.essence.pool", kind: "derived", note: "recomputed" });
     table.push({ from: "attributes.edg.current", kind: "derived", note: "vestigial: Edge lives in edge.*, attributes.edg is never read" });
     table.push({ from: "attributes.edg.max", kind: "derived", note: "vestigial: Edge lives in edge.*, attributes.edg is never read" });
@@ -110,23 +114,25 @@ export function buildCritterTable() {
 
     // ---- condition monitors (V2 stores boxes remaining)
     table.push({
-        from: "physical.dmg", to: "health.physicalCM.value", kind: "transform", needs: ["attributes.bod.base"],
+        from: "physical.dmg", to: "health.physicalCM.value", kind: "transform", needs: [["attributes.bod.base", "attributes.body.rank"]],
         records: ["overflow.dmg", "physical.mod"],
         transform: monitorTransform("physical", "bod", true), translate: monitorTranslate("physical", "physicalCM"),
         note: "value = max - dmg - overflow.dmg, max = 8 + round(BOD pool / 2) + physical.mod (actor.js:1066-1074); negative means overflow"
     });
     table.push({
-        from: "stun.dmg", to: "health.stunCM.value", kind: "transform", needs: ["attributes.wil.base"],
+        from: "stun.dmg", to: "health.stunCM.value", kind: "transform", needs: [["attributes.wil.base", "attributes.willpower.rank"]],
         records: ["stun.mod"],
         transform: monitorTransform("stun", "wil", false), translate: monitorTranslate("stun", "stunCM"),
         note: "value = max - dmg, max = 8 + round(WIL pool / 2) + stun.mod (actor.js:1075-1080)"
     });
     for (const monitor of ["physical", "stun"]) {
-        table.push({ from: `${monitor}.mod`, kind: "flag", note: "V2 monitors have no mod; V1b decides" });
+        // The stored value has no V2 home; effects add to the in-memory bag health.<monitor>CM.mod, which prepare reads
+        table.push({ from: `${monitor}.mod`, kind: "flag", effectTo: `health.${monitor === "physical" ? "physicalCM" : "stunCM"}.mod`, note: "stored value has no V2 home (V1b-2 decides); effects move to the in-memory modifier bag" });
         for (const leaf of ["base", "value", "max", "modString"]) table.push({ from: `${monitor}.${leaf}`, kind: "derived", note: "recomputed from attributes and damage" });
     }
     table.push({ from: "overflow.dmg", kind: "derived", note: "folded into health.physicalCM.value (see physical.dmg); original recorded in the v1 copy" });
-    for (const leaf of ["mod", "modString", "value", "max"]) table.push({ from: `overflow.${leaf}`, kind: "derived", note: "overflow is derived from the physical monitor in V2" });
+    table.push({ from: "overflow.mod", kind: "flag", effectTo: "health.overflowMod", note: "stored value has no V2 home (V1b-2 decides); effects move to the in-memory modifier bag" });
+    for (const leaf of ["modString", "value", "max"]) table.push({ from: `overflow.${leaf}`, kind: "derived", note: "overflow is derived from the physical monitor in V2" });
 
     // ---- initiative
     for (const k of INITIATIVES) {

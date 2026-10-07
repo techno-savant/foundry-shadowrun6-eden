@@ -55,7 +55,7 @@ export function applyV2Renames(source, table, { partial = false, isV2Path, ctx =
             continue;
         }
         if (kind === "transform") {
-            if (!(entry.needs ?? []).every((need) => hasPath(original, need))) {
+            if (!(entry.needs ?? []).every((need) => (Array.isArray(need) ? need.some((n) => hasPath(original, n)) : hasPath(original, need)))) {
                 result.skipped.push(from);
                 continue;
             }

@@ -73,7 +73,8 @@ async function migrateType(type) {
             const bars = planTokenBars(token.toObject());
             if (bars) Object.assign(data, bars.update);
             if (!token.actorLink) {
-                const delta = planDelta(token.delta?.toObject().system, table, options);
+                const base = token.baseActor?.toObject().system;
+                const delta = planDelta(token.delta?.toObject().system, table, { ...options, base });
                 if (delta) Object.assign(data, delta.update);
             }
             if (Object.keys(data).length > 1) updates.push(data);
