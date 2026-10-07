@@ -99,12 +99,13 @@ export function pickSkillPool(pools, { id, spec, specializations = [], expertise
  * @param {object} input
  * @param {Record<string, number>} input.pools   P per V2 attribute id (body, agility, reaction, strength, willpower, logic, intuition, charisma, magic, resonance)
  * @param {Record<string, {rank?: number, mod?: number, specializations?: object, expertise?: string}>} [input.skills]
- * @param {{physical?: number, astral?: number, matrix?: number}} [input.initiativeDice]   stored dice + diceMod
+ * @param {{physical?: number, astral?: number, matrix?: number}} [input.initiativeDice]   stored dice
+ * @param {{physical?: number, astral?: number, matrix?: number}} [input.initiativeDiceMods]   stored diceMod (settled to 0 by migration, but effects and edits can set it later)
  * @param {{health?: {physicalCM?: number, stunCM?: number, overflow?: number}, initiative?: Record<string, number>, derived?: Record<string, number>, attackRating?: Record<string, number>, defenseRating?: Record<string, number>, defensePool?: Record<string, number>}} [input.mods]   effect modifiers per bag (default 0)
  * @param {{defense?: number, hardened?: number}} [input.armor]   worn armor defense and hardened armor (legacy `traits.hardenedArmor`)
  * @param {string|null} [input.tradition]   V2 attribute id of the tradition's attribute, if any
  */
-export function deriveCritter({ pools: P, skills = {}, initiativeDice = {}, mods = {}, armor = {}, tradition = null }) {
+export function deriveCritter({ pools: P, skills = {}, initiativeDice = {}, initiativeDiceMods = {}, mods = {}, armor = {}, tradition = null }) {
     const sum = (ids) => ids.reduce((n, id) => n + num(P[id]), 0);
     const m = (family, key) => num(mods[family]?.[key]);
 
@@ -116,7 +117,7 @@ export function deriveCritter({ pools: P, skills = {}, initiativeDice = {}, mods
     };
 
     // actor.js:1084-1095: base from attribute pools, pool = base + mod; dicePool = clamp(dice + diceMod, 1, 5) (:1086, :1090, :1095)
-    const dice = (k) => clamp(num(initiativeDice[k] ?? 1), 1, 5);
+    const dice = (k) => clamp(num(initiativeDice[k] ?? 1) + num(initiativeDiceMods[k]), 1, 5);
     const initiative = {
         physical: { rank: sum(["reaction", "intuition"]) + m("initiative", "physical"), dice: dice("physical") }, // :1084
         astral: { rank: sum(["logic", "intuition"]) + m("initiative", "astral"), dice: dice("astral") },         // :1088

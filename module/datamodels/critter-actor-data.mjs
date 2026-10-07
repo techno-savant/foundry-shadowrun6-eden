@@ -194,6 +194,7 @@ export default class SR6CritterActorData extends SR6BaseActorData {
             pools,
             skills: self.skills,
             initiativeDice: {physical: self.initiative.physical.dice, astral: self.initiative.astral.dice, matrix: self.initiative.matrix.dice},
+            initiativeDiceMods: {physical: self.initiative.physical.diceMod, astral: self.initiative.astral.diceMod, matrix: self.initiative.matrix.diceMod},
             mods: {
                 health: {physicalCM: self.health.physicalCM.mod, stunCM: self.health.stunCM.mod, overflow: self.health.overflowMod},
                 initiative: {physical: self.initiative.physical.mod, astral: self.initiative.astral.mod, matrix: self.initiative.matrix.mod},
@@ -209,7 +210,10 @@ export default class SR6CritterActorData extends SR6BaseActorData {
             self.health.overflow.max = result.health.overflowMax;
             self.health.overflow.value = self.health.overflow.max - self.health.overflow.dmg;
         }
-        for (const key of ["physical", "astral", "matrix"]) self.initiative[key].rank = result.initiative[key].rank;
+        for (const key of ["physical", "astral", "matrix"]) {
+            self.initiative[key].rank = result.initiative[key].rank;
+            self.initiative[key].dice = result.initiative[key].dice; // stored dice + diceMod, clamped 1..5 (actor.js:1086)
+        }
         for (const family of ["derived", "attackRating", "defenseRating", "defensePool"]) {
             for (const [key, value] of Object.entries(result[family])) Object.assign(self[family][key], value);
         }
