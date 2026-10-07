@@ -88,20 +88,20 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
 
         // HTML enriching for sheets
         this.item.enriched = {};
-        this.item.enriched.description = await this.enrichedHTML(/** @type {SR6LegacyItemSystem} */ (this.item.system).description);
-        if (/** @type {SR6LegacyItemSystem} */ (this.item.system).accessories) this.item.enriched.accessories = await this.enrichedHTML(/** @type {SR6LegacyItemSystem} */ (this.item.system).accessories);
+        this.item.enriched.description = await this.enrichedHTML(/** @type {SR6ItemSystem} */ (this.item.system).description);
+        if (/** @type {SR6GearSystem} */ (this.item.system).accessories) this.item.enriched.accessories = await this.enrichedHTML(/** @type {SR6GearSystem} */ (this.item.system).accessories);
         if (this.actor) {
             for (const item of this.actor.items) {
                 // HTML enriching Gear Mods
-                if (/** @type {SR6LegacyItemSystem} */ (item.system).installedIn?.id === this.item.id) {
+                if (/** @type {SR6ModSystem} */ (item.system).installedIn?.id === this.item.id) {
                     item.enriched = {};
-                    item.enriched.description = await this.enrichedHTML(/** @type {SR6LegacyItemSystem} */ (item.system).description);
+                    item.enriched.description = await this.enrichedHTML(/** @type {SR6ItemSystem} */ (item.system).description);
                 }
             }
         }
 
         data.gearConfig = this._getGearConfig();
-        const system = /** @type {SR6LegacyItemSystem} */ (this.item.system);
+        const system = /** @type {SR6GearSystem} */ (this.item.system);
 
         if (system.isElectronicMatrixDevice) {
             data.hud = {};
@@ -115,7 +115,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
                 data.hud.showAmmo = true;
             }
 
-            if (/** @type {SR6LegacyItemSystem} */ (this.item.system).matrix.matrixCM.value === 0) {
+            if (/** @type {SR6GearSystem} */ (this.item.system).matrix.matrixCM.value === 0) {
                 data.hud.bricked = true;
             }
 
@@ -135,18 +135,18 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
 
     _getGearConfig() {
         const GEAR = CONFIG.SR6.GEAR;
-        const typeConfig = GEAR[/** @type {SR6LegacyItemSystem} */ (this.item.system).type];
+        const typeConfig = GEAR[/** @type {SR6GearSystem} */ (this.item.system).type];
         if (!typeConfig) return null;
-        const subtypeConfig = typeConfig.subtypes[/** @type {SR6LegacyItemSystem} */ (this.item.system).subtype];
+        const subtypeConfig = typeConfig.subtypes[/** @type {SR6GearSystem} */ (this.item.system).subtype];
         if (!subtypeConfig) return null;
 
         const config = {
             showRating: subtypeConfig.showRating ?? false,
             showCountable: subtypeConfig.showCountable ?? false,
             showMatrixDeviceConfig: subtypeConfig.showMatrixDeviceConfig ?? 0, // CONFIG.SR6.MATRIX_DEVICE_CONFIG // 0 = NEVER, 1 = OPTIONAL, 2 = ALWAYS
-            isElectronicMatrixDevice: /** @type {SR6LegacyItemSystem} */ (this.item.system).isElectronicMatrixDevice || /** @type {SR6LegacyItemSystem} */ (this.item.system).matrix.hasWirelessInterface || /** @type {SR6LegacyItemSystem} */ (this.item.system).matrix.hasDataCableInterface,
-            disableElectronicMatrixDevice: subtypeConfig.showMatrixDeviceConfig === CONFIG.SR6.MATRIX_DEVICE_CONFIG.ALWAYS || /** @type {SR6LegacyItemSystem} */ (this.item.system).matrix.hasWirelessInterface || /** @type {SR6LegacyItemSystem} */ (this.item.system).matrix.hasDataCableInterface,
-            disableWirelessInterface: GEAR.TYPES_WITH_ALWAYS_WIFI.has(/** @type {SR6LegacyItemSystem} */ (this.item.system).type) || GEAR.SUBTYPES_MATRIX_ACCESS.has(/** @type {SR6LegacyItemSystem} */ (this.item.system).subtype),
+            isElectronicMatrixDevice: /** @type {SR6GearSystem} */ (this.item.system).isElectronicMatrixDevice || /** @type {SR6GearSystem} */ (this.item.system).matrix.hasWirelessInterface || /** @type {SR6GearSystem} */ (this.item.system).matrix.hasDataCableInterface,
+            disableElectronicMatrixDevice: subtypeConfig.showMatrixDeviceConfig === CONFIG.SR6.MATRIX_DEVICE_CONFIG.ALWAYS || /** @type {SR6GearSystem} */ (this.item.system).matrix.hasWirelessInterface || /** @type {SR6GearSystem} */ (this.item.system).matrix.hasDataCableInterface,
+            disableWirelessInterface: GEAR.TYPES_WITH_ALWAYS_WIFI.has(/** @type {SR6GearSystem} */ (this.item.system).type) || GEAR.SUBTYPES_MATRIX_ACCESS.has(/** @type {SR6GearSystem} */ (this.item.system).subtype),
             disableDataCableInterface: false //this.item.system.type === "CYBERWARE"
         }
 
@@ -315,7 +315,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
                 
                 if ( field == "system.matrix.matrixCM.dmg") {
                     field = "system.matrix.matrixCM.value";
-                    value = /** @type {SR6LegacyItemSystem} */ (this.document.system).matrix.matrixCM.parseDmgToValue( value );
+                    value = /** @type {SR6PreparedGearSystem} */ (this.document.system).matrix.matrixCM.parseDmgToValue( value );
                 }
 
                 console.log("SR6E | SR6ItemSheet Updating", field, value);
@@ -468,7 +468,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
         const effect = this._getEffect(target);
         await effect.update({ disabled: !effect.disabled });
         this.render();
-        const itemThatWasModded = /** @type {SR6LegacyItemSystem} */ (this.item.system).installedIn;
+        const itemThatWasModded = /** @type {SR6ModSystem} */ (this.item.system).installedIn;
         if (itemThatWasModded) itemThatWasModded.render();
     }
 
@@ -503,7 +503,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
         console.log("SR6E | _onWeaponAmmoReload");
         event.preventDefault();
         const weapon = this.item;
-        const updated = await weapon.update({ "system.ammocount": /** @type {SR6LegacyItemSystem} */ (weapon.system).ammocap });
+        const updated = await weapon.update({ "system.ammocount": /** @type {SR6GearSystem} */ (weapon.system).ammocap });
         if (updated !== undefined) {
             console.log("SR6E | Weapon's Ammo Reloaded:", updated.name, updated.uuid);
         }
@@ -548,7 +548,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
         if (conditionMonitor === "matrix") {
             trackColor = "green"
             attr = "system.matrix.matrixCM.value";
-            deltaTrack = newValue - /** @type {SR6LegacyItemSystem} */ (this.document.system).matrix.matrixCM.value;
+            deltaTrack = newValue - /** @type {SR6PreparedGearSystem} */ (this.document.system).matrix.matrixCM.value;
         }
 
         // TODO Showing delta within portrait
@@ -683,7 +683,7 @@ export default class SR6ItemSheet extends foundry.appv1.sheets.ItemSheet {
     #changeCmDamageToValues(changes) {
         try {
             if ( "system.matrix.matrixCM.dmg" in changes) {
-                changes["system.matrix.matrixCM.value"] = /** @type {SR6LegacyItemSystem} */ (this.document.system).matrix.matrixCM.parseDmgToValue(changes["system.matrix.matrixCM.dmg"]);
+                changes["system.matrix.matrixCM.value"] = /** @type {SR6PreparedGearSystem} */ (this.document.system).matrix.matrixCM.parseDmgToValue(changes["system.matrix.matrixCM.dmg"]);
             }
         } catch (error) {
             console.warn(`${error.name}: ${error.message}`);

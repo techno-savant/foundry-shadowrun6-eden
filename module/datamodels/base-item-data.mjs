@@ -1,8 +1,22 @@
+/** Schema of the V2 item base; module-level so checkJs can type the models from it. */
+export function baseItemSchema() {
+    const fields = foundry.data.fields;
+
+    return {
+        description: /** @type {foundry.data.fields.HTMLField<SR6StringOptions>} */ (new fields.HTMLField()),
+        genesisID: new fields.StringField(/** @type {SR6StringOptions} */ ({required: false, nullable: true})),
+        availDef: new fields.StringField(/** @type {SR6StringOptions} */ ({required: false, nullable: true, initial: "1L"})),
+        price: new fields.NumberField({required: true, nullable: false, initial: 0, min: 0}),
+        product: new fields.StringField({required: false, choices: CONFIG.SR6.PDF_OPTIONS.BOOKS}),
+        page: new fields.NumberField({required: false, nullable: true, initial: null, min: 1}),
+    };
+}
+
 /**
  * Base Item DataModel for SR6e
  *
- * @extends {TypeDataModel}
- * @extends {DataModel}
+ * @template {foundry.data.fields.DataSchema} [Schema=ReturnType<typeof baseItemSchema>]
+ * @extends {foundry.abstract.TypeDataModel<Schema, Item.Implementation>}
  * @example notes:
  * this.parent is the Item document
  */
@@ -10,30 +24,7 @@ export default class SR6BaseItemData extends foundry.abstract.TypeDataModel {
     static LOCALIZATION_PREFIXES = ["SR6.Item.base", "SR6.Common"];
 
     static defineSchema() {
-        const fields = foundry.data.fields;
-
-        // const requiredInteger = { required: true, nullable: false, integer: true };
-        // schema.health = new fields.SchemaField({
-        //   value: new fields.NumberField({
-        //                ...requiredInteger,
-        //                initial: 10,
-        //                min: 0,
-        //   }),
-        //   max: new fields.NumberField({ ...requiredInteger, initial: 10 }),
-        // });
-        // schema.power = new fields.SchemaField({
-        //   value: new fields.NumberField({ ...requiredInteger, initial: 5, min: 0 }),
-        //   max: new fields.NumberField({ ...requiredInteger, initial: 5 }),
-        // });
-
-        return {
-            description: new fields.HTMLField(),
-            genesisID: new fields.StringField({required: false, nullable: true}),
-            availDef: new fields.StringField({required: false, nullable: true, initial: "1L"}),
-            price: new fields.NumberField({required: true, nullable: false, initial: 0, min: 0}),
-            product: new fields.StringField({required: false, choices: CONFIG.SR6.PDF_OPTIONS.BOOKS}),
-            page: new fields.NumberField({required: false, nullable: true, initial: null, min: 1}),
-        };
+        return baseItemSchema();
     }
 
     /**

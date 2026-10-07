@@ -1,9 +1,16 @@
-import SR6BaseItemData from "./base-item-data.mjs";
+import SR6BaseItemData, { baseItemSchema } from "./base-item-data.mjs";
 import { sanitizeDescription, sanitizeNumbers, sanitizeObjects, sanitizeV2Base } from "./legacy-item-sanitizers.mjs";
+
+/** Schema shared by the genesis item types (the V2 item base, unchanged). */
+export function genesisItemSchema() {
+    return baseItemSchema();
+}
 
 /**
  * Base for the item types built on the `genesis` template of the legacy template.json.
  * The four genesis keys (genesisID, description, product, page) come from the V2 item base, which keeps their names.
+ * @template {foundry.data.fields.DataSchema} [Schema=ReturnType<typeof genesisItemSchema>]
+ * @extends {SR6BaseItemData<Schema>}
  */
 export default class SR6GenesisItemData extends SR6BaseItemData {
 
