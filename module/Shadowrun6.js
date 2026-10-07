@@ -32,6 +32,7 @@ import * as datamodels from "./datamodels/_module.mjs";
 import * as documents from "./documents/_module.mjs";
 import * as applications from "./applications/_module.mjs";
 import * as rollTypes from "./dice/RollTypes.js";
+import * as migrations from "./migrations/v2/index.mjs";
 
 /**
  * Init hook. Called from Foundry when initializing the world
@@ -63,6 +64,7 @@ Hooks.once("init", async function () {
     game.sr6.roll = SR6Roll;
     game.sr6.sockets = new SR6SocketHandler();
     game.sr6.releaseNotes = releaseNotes;
+    game.sr6.migrations = migrations;
     
     CONFIG.Combat.documentClass = Shadowrun6Combat;
     CONFIG.Combatant.documentClass = Shadowrun6Combatant;
@@ -367,6 +369,7 @@ Hooks.once("init", async function () {
         }
         CONFIG.SR6.DATA_ENTRY = game.settings.get(game.system.id, "dataEntry") || false;
         await migrateWorld();
+        await game.sr6.migrations.maybeRunV2Migration(); // no-op until an actor type is enabled
         await pdfJournalInit();
         game.sr6.releaseNotes();
 

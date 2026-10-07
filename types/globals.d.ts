@@ -58,4 +58,5 @@ interface SR6GameNamespace {
   roll: typeof SR6Roll;
   sockets: SR6SocketHandler;
   releaseNotes: typeof releaseNotes;
+  migrations: typeof import("../module/migrations/v2/index.mjs");
 }

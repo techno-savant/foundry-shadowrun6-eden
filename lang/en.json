@@ -2510,6 +2510,15 @@
     "resetOneAccessLevelDescription": "Do you want to reset Access Levels for this one Actor?"
   },
   "SR6": {
+    "Migration": {
+      "V2": {
+        "backupTitle": "Back up your world",
+        "backupContent": "Shadowrun 6 Eden is about to convert actor data to the new format. Old values are kept, but please take a world backup first (Setup, Backups). Migrate now?",
+        "now": "Migrate now",
+        "later": "Later",
+        "done": "Shadowrun 6 Eden: actor data migration finished."
+      }
+    },
     "Common": {
       "FIELDS": {
         "name": {
