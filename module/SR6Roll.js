@@ -195,7 +195,7 @@ export default class SR6Roll extends Roll {
 
             if (this.finished.monitor === MonitorType.PHYSICAL && this.finished.damage > 0 && game.settings.get(SYSTEM_NAME, "armorLessensDmg")) {
                 // TODO for Blast Attacks, armorLessensDmg is /4 DR
-                const armorLessensDmg = Math.floor(this.finished.actor.system.defenserating.physical.pool / 8);
+                const armorLessensDmg = Math.floor(this.finished.actor.getDefenseValue("defenserating", "physical").pool / 8);
                 console.log("SR6E | armorLessensDmg, reducing damage by", armorLessensDmg);
                 const newDamage = Math.max(0, this.finished.damage - armorLessensDmg);
                 const convertedToStun = this.finished.damage - newDamage;
@@ -209,12 +209,12 @@ export default class SR6Roll extends Roll {
             }
 
             if (this.finished.soakType === SoakType.DRAIN) {
-                if ((this.finished.threshold - this.result) > this.finished.actor.system.attributes.mag.pool) {
+                if ((this.finished.threshold - this.result) > this.finished.actor.getSystemProperty("attributes.mag.pool")) {
                     this.finished.monitor = MonitorType.PHYSICAL;
                 }
             }
             else if (this.finished.soakType === SoakType.FADING) {
-                if ((this.finished.threshold - this.result) > this.finished.actor.system.attributes.res.pool) {
+                if ((this.finished.threshold - this.result) > this.finished.actor.getSystemProperty("attributes.res.pool")) {
                     this.finished.monitor = MonitorType.PHYSICAL;
                 }
             }

@@ -116,7 +116,7 @@ async function _showRollDialog(data) {
                 // Calculating the highest defense pool of all targets
                 let targetDefensePool = 0
                 game.user.targets.forEach((token) => {
-                    targetDefensePool = Math.max(targetDefensePool, token.actor.system.defensepool.physical.pool);
+                    targetDefensePool = Math.max(targetDefensePool, token.actor.getDefenseValue("defensepool", "physical").pool);
                 });
                 data.threshold += Math.floor( targetDefensePool / 6 );
                 data.cantDodgeBulletsBaseThreshold = data.threshold;

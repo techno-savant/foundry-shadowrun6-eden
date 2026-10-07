@@ -7,6 +7,7 @@ import { doRoll } from "../Rolls.js";
 import { RollType, DefenseRoll, SoakType, SoakRoll, TokenData, InitiativeType, DirectDamage } from "../dice/RollTypes.js";
 import { getActor } from "../util/helper.js";
 import { SR6MatrixPanField } from "../datamodels/fields/fields.mjs";
+import { ATTACK_RATINGS, DEFENSE_POOLS, DEFENSE_RATINGS } from "../datamodels/derive/character.mjs";
 const { DOCUMENT_OWNERSHIP_LEVELS } = foundry.CONST;
 
 function isLifeform(obj) {
@@ -392,6 +393,7 @@ export default class Shadowrun6Actor extends Actor {
         // Modern DataModel Actors skip legacy data load flow
         if (this.system instanceof foundry.abstract.DataModel) {
             await super._preUpdate(changes, options, user);
+            await this.updateGruntGroup(changes, options); // V2 actors share edge across a grunt group too (edge.current)
             return;
         }
         
@@ -2302,6 +2304,11 @@ export default class Shadowrun6Actor extends Actor {
         }
 
         if (this.system instanceof foundry.abstract.DataModel) {
+            // V2 models that derive skill pools (Critter) answer with specialization and expertise included
+            const v2System = /** @type {any} */ (this.system);
+            if (typeof v2System.skillPool === "function") {
+                return v2System.skillPool(skillId, {spec, attributePool: this.getSystemProperty(attributePath) ?? 0});
+            }
             // TODO JEROEN Actor.rollSkill needs further reworking for DataModel Actors to support specializations and expertise properly
             // TODO currently doesnt use skill-data testPool, would need rework
             const skillPool = this.system.skills?.[skillId]?.pool ?? (this.type === "host" ? this.system.rating : 0);
@@ -2501,7 +2508,7 @@ export default class Shadowrun6Actor extends Actor {
         console.log("SR6E | Roll targets ", roll.targets);
         let highestDefenseRating = this._getHighestDefenseRating((a) => {
             console.log("SR6E | Determine defense rating of ", a);
-            return a.system.defenserating.physical.pool;
+            return a.getDefenseValue("defenserating", "physical").pool;
         });
         console.log("SR6E | Highest defense rating of targets: " + highestDefenseRating);
         if (highestDefenseRating > 0)
@@ -2554,8 +2561,8 @@ export default class Shadowrun6Actor extends Actor {
         roll.pool = this._getSkillPool(roll.skillId, roll.skillSpec);
         // Determine whether or not the spell is an opposed test
         // and what defense eventually applies
-        roll.attackRating = roll.performer.attackrating.astral.pool;
-        let highestDefenseRating = this._getHighestDefenseRating((a) => a.system.defenserating.physical.pool);
+        roll.attackRating = this.getDefenseValue("attackrating", "astral").pool;
+        let highestDefenseRating = this._getHighestDefenseRating((a) => a.getDefenseValue("defenserating", "physical").pool);
         console.log("SR6E | Highest defense rating of targets: " + highestDefenseRating);
 
         if (highestDefenseRating > 0)
@@ -2631,7 +2638,7 @@ export default class Shadowrun6Actor extends Actor {
             case Defense.PHYSICAL:
                 // In combat defense, the defender must have MORE hits than the attacker to completely defend
                 rollData.actionText = game.i18n.format("shadowrun6.roll.actionText.defense." + defendWith, { threshold: 0 });
-                defensePool = data.defensepool.physical;
+                defensePool = this.getDefenseValue("defensepool", "physical");
                 if (isLifeform(data)) {
                     rollData.checkText = game.i18n.localize("attrib.rea") + " + " + game.i18n.localize("attrib.int") + " (" + threshold + ")";
                 } else {
@@ -2640,20 +2647,20 @@ export default class Shadowrun6Actor extends Actor {
                 break;
             case Defense.SPELL_INDIRECT:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle defense rolls via chatbutton for ${defendWith} are not implemented yet.`);
-                defensePool = data.defensepool.spells_indirect;
+                defensePool = this.getDefenseValue("defensepool", "spells_indirect");
                 rollData.actionText = game.i18n.localize("shadowrun6.roll.actionText.defense." + defendWith);
                 rollData.checkText = game.i18n.localize("attrib.rea") + " + " + game.i18n.localize("attrib.wil") + " (" + threshold + ")";
                 break;
             case Defense.SPELL_DIRECT:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle defense rolls via chatbutton for ${defendWith} are not implemented yet.`);
                 rollData.allowSoak = false;
-                defensePool = data.defensepool.spells_direct;
+                defensePool = this.getDefenseValue("defensepool", "spells_direct");
                 rollData.actionText = game.i18n.localize("shadowrun6.roll.actionText.defense." + defendWith);
                 rollData.checkText = game.i18n.localize("attrib.wil") + " + " + game.i18n.localize("attrib.int") + " (" + threshold + ")";
                 break;
             case Defense.SPELL_OTHER:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle defense rolls via chatbutton for ${defendWith} are not implemented yet.`);
-                defensePool = data.defensepool.spells_other;
+                defensePool = this.getDefenseValue("defensepool", "spells_other");
                 rollData.actionText = game.i18n.localize("shadowrun6.roll.actionText.defense." + defendWith);
                 rollData.checkText = game.i18n.localize("attrib.wil") + " + " + game.i18n.localize("attrib.int");
                 break;
@@ -2760,21 +2767,21 @@ export default class Shadowrun6Actor extends Actor {
         let rollData = new SoakRoll(damage, soak);
         switch (soak) {
             case SoakType.DAMAGE_PHYSICAL:
-                defensePool = data.defensepool.damage_physical;
+                defensePool = this.getDefenseValue("defensepool", "damage_physical");
                 rollData.monitor = MonitorType.PHYSICAL;
                 rollData.actionText = game.i18n.format("shadowrun6.roll.actionText.soak." + soak, { damage: damage });
                 rollData.checkText = game.i18n.localize("attrib.bod") + " (" + damage + ")";
                 break;
             case SoakType.DAMAGE_STUN:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle soak rolls via chatbutton for ${soak} are not implemented yet.`);
-                defensePool = data.defensepool.damage_physical;
+                defensePool = this.getDefenseValue("defensepool", "damage_physical");
                 rollData.monitor = MonitorType.STUN;
                 rollData.actionText = game.i18n.format("shadowrun6.roll.actionText.soak." + soak, { damage: damage });
                 rollData.checkText = game.i18n.localize("attrib.bod") + " (" + damage + ")";
                 break;
             case SoakType.DRAIN:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle soak rolls via chatbutton for ${soak} are not implemented yet.`);
-                defensePool = data.defensepool.drain;
+                defensePool = this.getDefenseValue("defensepool", "drain");
                 rollData.monitor = MonitorType.STUN; 
                 rollData.actionText = game.i18n.format("shadowrun6.roll.actionText.soak." + soak, { damage: damage });
                 rollData.checkText = game.i18n.localize("attrib.wil") + " (" + damage + ")";
@@ -2785,7 +2792,7 @@ export default class Shadowrun6Actor extends Actor {
                 break;
             case SoakType.FADING:
                 if (!isLifeform(data)) throw ui.notifications.error(`SR6E | Vehicle soak rolls via chatbutton for ${soak} are not implemented yet.`);
-                defensePool = data.defensepool.fading;
+                defensePool = this.getDefenseValue("defensepool", "fading");
                 rollData.monitor = MonitorType.STUN;
                 rollData.actionText = game.i18n.format("shadowrun6.roll.actionText.soak." + soak, { damage: damage });
                 rollData.checkText = game.i18n.localize("attrib.wil") + " (" + damage + ")";
@@ -3001,6 +3008,9 @@ export default class Shadowrun6Actor extends Actor {
 
         if (monitor === "matrix") return await this.applyMatrixDamage(damageData);
 
+        // V2 actors store boxes remaining in health.<physical|stun>CM.value, not damage taken
+        if (this.system instanceof foundry.abstract.DataModel) return await this.#applyDamageV2(damageData);
+
         let result, newDamage;
         const data = this.system;
         const damageObj = data[monitor];
@@ -3044,6 +3054,29 @@ export default class Shadowrun6Actor extends Actor {
 
         console.log("SR6E | Applied "+monitor+" "+damage+" damage to", this.name);
         return true;
+    }
+
+    /**
+     * V2 damage: lower health.<monitor>CM.value. Stun below zero spills into physical in the model's _preUpdate, and the
+     * physical value may go down to minus the overflow maximum. The model's _onUpdate evaluates unconscious and dead.
+     * @param {object} damageData   as for applyDamage
+     * @returns {Promise<boolean>}
+     */
+    async #applyDamageV2({ monitor, damage, newDmg }) {
+        const key = monitor === MonitorType.STUN ? "stunCM" : "physicalCM";
+        const monitorData = this.system.health?.[key];
+        if (!monitorData) {
+            console.warn(`SR6E | applyDamage | ${this.name} (${this.type}) has no ${monitor} monitor`);
+            return false;
+        }
+        const taken = typeof newDmg !== "undefined" ? newDmg : monitorData.max - monitorData.value + damage;
+        let value = monitorData.max - Math.max(0, taken);
+        if (key === "physicalCM") {
+            const overflowMax = this.system.health.overflow?.max ?? (this.system.attributes?.body?.pool ?? 0) * 2;
+            value = Math.max(value, -overflowMax);
+        }
+        const result = await this.update({ [`system.health.${key}.value`]: value });
+        return !!result;
     }
 
     async applyMatrixDamage(damageData) {
@@ -3418,8 +3451,10 @@ export default class Shadowrun6Actor extends Actor {
 
         canvas.tokens.ownedTokens.forEach(async (token) => {
             if (token.document.getFlag(game.system.id, 'GruntGroupId') === gruntGroupId && token.actor.uuid !== this.uuid ) {
-                if (typeof changes.system?.edge?.value !== 'undefined') {
-                    await token.actor.update({'system.edge.value': changes.system.edge.value}, {updatingGruntGroup: true});
+                // V2 actors store the current edge at edge.current, legacy actors at edge.value
+                const edgeField = this.isActorV2 ? "current" : "value";
+                if (typeof changes.system?.edge?.[edgeField] !== 'undefined') {
+                    await token.actor.update({[`system.edge.${edgeField}`]: changes.system.edge[edgeField]}, /** @type {any} */ ({updatingGruntGroup: true}));
                 }
             }
         });
@@ -3469,6 +3504,31 @@ export default class Shadowrun6Actor extends Actor {
 
     get matrixDeviceItems() {
         return this.items.filter(i => /** @type {SR6GearSystem | SR6SoftwareSystem} */ (i.system).isElectronicMatrixDevice);
+    }
+
+    /**
+     * One resolver for defense pools, defense ratings and attack ratings, for legacy and V2 actors.
+     * - legacy: `system.<family>.<key>`, the very object the prepare code fills (unchanged);
+     * - V2 with modifier bags (Critter): `system.defensePool|defenseRating|attackRating.<key>`;
+     * - V2 without bags (sprite, host): the attribute pools behind the value, or 0 where there are none.
+     * @param {"defensepool"|"defenserating"|"attackrating"} family   legacy family name
+     * @param {string} key   for example "physical" or "damage_physical"
+     * @returns {{pool: number}}
+     */
+    getDefenseValue(family, key) {
+        const system = this.system;
+        if (!(system instanceof foundry.abstract.DataModel)) return system[family]?.[key];
+
+        const bags = { defensepool: "defensePool", defenserating: "defenseRating", attackrating: "attackRating" };
+        const bag = system[bags[family]]?.[key];
+        if (bag) return bag;
+
+        const attributes = { defensepool: DEFENSE_POOLS, defenserating: DEFENSE_RATINGS, attackrating: ATTACK_RATINGS }[family]?.[key];
+        if (!attributes) {
+            console.warn(`SR6E | getDefenseValue | ${this.name} (${this.type}) has no ${family}.${key}; using 0`);
+            return { pool: 0 };
+        }
+        return { pool: attributes.reduce((sum, id) => sum + (/** @type {any} */ (system).attributes?.[id]?.pool ?? 0), 0) };
     }
 
     /**

@@ -605,7 +605,7 @@ export class RollDialog extends Dialog {
         let poolMod = 0;    //not used?
 
         if (game.settings.get(SYSTEM_NAME, "highStrengthReducesRecoil") && this.dialogResult.dualHand && arMod < 0) {
-            const actorStrength = this.actor.system.attributes.str.pool;
+            const actorStrength = this.actor.getSystemProperty("attributes.str.pool");
             let strengthArReduction = 0;
             strengthArReduction += ( actorStrength >= 7 ) ? 1 : 0;
             strengthArReduction += ( actorStrength >= 10 ) ? 1 : 0;
@@ -730,7 +730,7 @@ export class RollDialog extends Dialog {
                 prepared.pool = attr ?? 0;
                 prepared.checkText =  game.i18n.localize(CONFIG.SR6.ATTRIBUTE_SELECT_OPTIONS[prepared.attributeTested])
             } else {
-                prepared.pool = this.actor.system.attributes[prepared.attributeTested].pool;
+                prepared.pool = this.actor.getSystemProperty(`attributes.${prepared.attributeTested}.pool`);
                 prepared.checkText =  game.i18n.localize(`attrib.${prepared.attributeTested}`)
             }
 

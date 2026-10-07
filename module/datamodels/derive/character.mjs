@@ -41,6 +41,10 @@ export const DERIVED = Object.freeze({
     resist_toxin: ["body", "willpower"],            // actor.js:1132
 });
 
+/** Attribute pools behind each rating, for V2 actors without modifier bags (actor.js:1153, :1163, :1221, :1259, :1280, :1299). */
+export const ATTACK_RATINGS = Object.freeze({ physical: ["reaction", "strength"], astral: [], social: ["charisma"] });
+export const DEFENSE_RATINGS = Object.freeze({ physical: ["body"], astral: ["intuition"], social: ["charisma"] });
+
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
