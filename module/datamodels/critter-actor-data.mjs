@@ -6,6 +6,10 @@ import { applyV2Renames } from "../migrations/v2/renames.mjs";
 import { translateUpdate } from "../migrations/v2/translate.mjs";
 import { CRITTER_TABLE, ATTRIBUTES, SKILLS } from "../migrations/v2/tables/critter.mjs";
 import { schemaDeclares } from "../migrations/v2/schema-paths.mjs";
+import { DEFENSE_POOLS, DERIVED, SKILL_SETTINGS, deriveCritter, pickSkillPool, skillPools } from "./derive/character.mjs";
+
+/** Loose view of the Critter's own fields for the prepare methods (actor models are untyped under checkJs). */
+/** @typedef {{attributes: Record<string, any>, edge: any, skills: Record<string, any>, health: any, initiative: any, defensePool: Record<string, any>, attackRating: Record<string, any>, defenseRating: Record<string, any>, derived: Record<string, any>}} CritterSystem */
 
 /**
  * Critters can have Magic or Resonance 0 (JC, 2026-10-05), so those two attributes accept rank 0.
@@ -38,13 +42,25 @@ class SR6CritterInitiativeData extends SR6InitiativeData {
     }
 }
 
+/** The legacy template gives astral initiative 2 dice (physical and matrix 1). */
+class SR6CritterAstralInitiativeData extends SR6CritterInitiativeData {
+    static defineSchema() {
+        const fields = foundry.data.fields;
+        return {
+            ...super.defineSchema(),
+            dice: /** @type {any} */ (new fields.NumberField({required: true, nullable: false, integer: true, initial: 2, min: 1, max: 5})),
+        };
+    }
+}
+
 class SR6CritterInitiativeField extends foundry.data.fields.EmbeddedDataField {
     /**
      * @param {any} [options]
      * @param {any} [context]
+     * @param {any} [model]
      */
-    constructor(options = {}, context = {}) {
-        super(SR6CritterInitiativeData, options, context);
+    constructor(options = {}, context = {}, model = SR6CritterInitiativeData) {
+        super(model, options, context);
     }
 }
 
@@ -73,16 +89,8 @@ export default class SR6CritterActorData extends SR6BaseActorData {
         type: "Critter"
     });
 
-    /** Primary attribute and untrained use of each skill, as for the other V2 actors. */
-    static SKILL_SETTINGS = Object.freeze({
-        astral: ["intuition", false], athletics: ["agility", true], biotech: ["logic", false],
-        close_combat: ["agility", true], con: ["charisma", true], conjuring: ["magic", false],
-        cracking: ["logic", false], electronics: ["logic", true], enchanting: ["magic", false],
-        engineering: ["logic", true], exotic_weapons: ["agility", false], firearms: ["agility", true],
-        influence: ["charisma", true], outdoors: ["intuition", true], perception: ["intuition", true],
-        piloting: ["reaction", true], sorcery: ["magic", false], stealth: ["agility", true],
-        tasking: ["resonance", false]
-    });
+    /** Primary attribute and untrained use of each skill (derive/character.mjs). */
+    static SKILL_SETTINGS = SKILL_SETTINGS;
 
     static defineSchema() {
         const fields = foundry.data.fields;
@@ -117,7 +125,7 @@ export default class SR6CritterActorData extends SR6BaseActorData {
             }),
             initiative: new fields.SchemaField({
                 physical: new SR6CritterInitiativeField(),
-                astral: new SR6CritterInitiativeField(),
+                astral: new SR6CritterInitiativeField({}, {}, SR6CritterAstralInitiativeData),
                 matrix: new SR6CritterInitiativeField(),
             }),
         };
@@ -146,5 +154,97 @@ export default class SR6CritterActorData extends SR6BaseActorData {
     async _preUpdate(changes, options, user) {
         translateUpdate(changes, /** @type {any} */ (this).parent, CRITTER_TABLE);
         return await super._preUpdate(changes, options, user);
+    }
+
+    /**
+     * Modifier bags that active effects add to. They are in-memory properties, not schema fields: effects are applied
+     * after this and before prepareDerivedData, which fills each bag's `base` and `pool`.
+     * Keys follow upstream's commented hints (config.js:4599-4614).
+     */
+    prepareBaseData() {
+        const self = /** @type {CritterSystem} */ (/** @type {unknown} */ (this));
+        const bags = (keys) => Object.fromEntries(keys.map((key) => [key, {base: 0, mod: 0, pool: 0}]));
+        self.defensePool = bags([...Object.keys(DEFENSE_POOLS), "vehicle", "drain"]);
+        self.attackRating = bags(["physical", "astral", "social"]);
+        self.defenseRating = bags(["physical", "astral", "social"]);
+        self.derived = bags([...Object.keys(DERIVED), "matrix_perception"]);
+        super.prepareBaseData();
+        // Monitor and overflow modifiers (legacy physical.mod, stun.mod, overflow.mod)
+        self.health.physicalCM.mod = 0;
+        self.health.stunCM.mod = 0;
+        self.health.overflowMod = 0;
+    }
+
+    /**
+     * Overrides the base: its mod clamp throws on the numeric `essence`. Clamps mods to at most +4 on the attributes
+     * (not essence), edge and skills, then fills the derived values from derive/character.mjs.
+     */
+    prepareDerivedData() {
+        const self = /** @type {CritterSystem} */ (/** @type {unknown} */ (this));
+        for (const [key, attribute] of Object.entries(self.attributes)) {
+            if (key === "essence") continue;
+            attribute.mod = Math.min(4, attribute.mod);
+        }
+        self.edge.mod = Math.min(4, self.edge.mod);
+        for (const skill of Object.values(self.skills)) skill.mod = Math.min(4, skill.mod);
+
+        const pools = this.#attributePools();
+        const bagMods = (bag) => Object.fromEntries(Object.entries(bag).map(([key, entry]) => [key, entry.mod]));
+        const result = deriveCritter({
+            pools,
+            skills: self.skills,
+            initiativeDice: {physical: self.initiative.physical.dice, astral: self.initiative.astral.dice, matrix: self.initiative.matrix.dice},
+            mods: {
+                health: {physicalCM: self.health.physicalCM.mod, stunCM: self.health.stunCM.mod, overflow: self.health.overflowMod},
+                initiative: {physical: self.initiative.physical.mod, astral: self.initiative.astral.mod, matrix: self.initiative.matrix.mod},
+                derived: bagMods(self.derived), attackRating: bagMods(self.attackRating),
+                defenseRating: bagMods(self.defenseRating), defensePool: bagMods(self.defensePool),
+            },
+            armor: {defense: 0, hardened: 0},
+        });
+
+        self.health.physicalCM.max = result.health.physicalMax;
+        self.health.stunCM.max = result.health.stunMax;
+        if (self.health.overflow) {
+            self.health.overflow.max = result.health.overflowMax;
+            self.health.overflow.value = self.health.overflow.max - self.health.overflow.dmg;
+        }
+        for (const key of ["physical", "astral", "matrix"]) self.initiative[key].rank = result.initiative[key].rank;
+        for (const family of ["derived", "attackRating", "defenseRating", "defensePool"]) {
+            for (const [key, value] of Object.entries(result[family])) Object.assign(self[family][key], value);
+        }
+    }
+
+    /** Attribute pools as the legacy `attributes.<id>.pool`: rating plus mod, never below 0 (actor.js:1039). */
+    #attributePools() {
+        const self = /** @type {CritterSystem} */ (/** @type {unknown} */ (this));
+        /** @type {Record<string, number>} */
+        const pools = {};
+        for (const [key, attribute] of Object.entries(self.attributes)) {
+            if (key !== "essence") pools[key] = Math.max(0, attribute.rank + attribute.mod);
+        }
+        return pools;
+    }
+
+    /**
+     * Dice pool of a skill roll, attribute included.
+     * @param {string} id   skill id
+     * @param {object} [options]
+     * @param {string} [options.spec]   specialization id (or the expertise) the roll uses; adds +2 / +3
+     * @param {number} [options.attributePool]   a caller's attribute override (legacy rolls pass one for vehicles)
+     * @returns {number}
+     */
+    skillPool(id, {spec, attributePool} = {}) {
+        const self = /** @type {CritterSystem} */ (/** @type {unknown} */ (this));
+        const skill = self.skills[id];
+        const settings = SKILL_SETTINGS[id];
+        if (!skill || !settings) return 0;
+        const [attribute, useUntrained] = settings;
+        const pools = skillPools({
+            attributePool: attributePool ?? this.#attributePools()[attribute] ?? 0,
+            rank: skill.rank, mod: skill.mod, useUntrained, exotic: id === "exotic_weapons",
+            hasSpecialization: Object.keys(skill.specializations ?? {}).length > 0, hasExpertise: !!skill.expertise,
+        });
+        return pickSkillPool(pools, {id, spec, specializations: Object.keys(skill.specializations ?? {}), expertise: skill.expertise});
     }
 }
