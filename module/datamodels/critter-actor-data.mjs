@@ -1,5 +1,6 @@
 import SR6BaseActorData from './base-actor-data.mjs';
 import SR6AttributeData from './fields/attribute-data.mjs';
+import SR6ConditionMonitor from './fields/condition-monitor-data.mjs';
 import SR6InitiativeData from './fields/initiative-data.mjs';
 import * as srFields from "./fields/fields.mjs";
 import { applyV2Renames } from "../migrations/v2/renames.mjs";
@@ -64,6 +65,32 @@ class SR6CritterInitiativeField extends foundry.data.fields.EmbeddedDataField {
     }
 }
 
+/**
+ * The Critter's condition monitor. `value` is NULL until something decides it: migration cannot compute boxes remaining
+ * (that needs the maximum WITH active effects, which only prepare has), so it records the legacy damage in `pendingDamage`
+ * and prepare resolves value = max - pendingDamage in memory. Any monitor change writes a number into `value`.
+ */
+class SR6CritterMonitor extends SR6ConditionMonitor {
+    static defineSchema() {
+        const fields = foundry.data.fields;
+        return {
+            ...super.defineSchema(),
+            value: /** @type {any} */ (new fields.NumberField({required: true, nullable: true, integer: true, initial: null})),
+            pendingDamage: new fields.NumberField({required: true, nullable: true, integer: true, initial: null, min: 0}),
+        };
+    }
+}
+
+class SR6CritterMonitorField extends foundry.data.fields.EmbeddedDataField {
+    /**
+     * @param {any} [options]
+     * @param {any} [context]
+     */
+    constructor(options = {}, context = {}) {
+        super(SR6CritterMonitor, options, context);
+    }
+}
+
 class SR6CritterZeroRankAttributeField extends foundry.data.fields.EmbeddedDataField {
     /**
      * @param {any} [options]
@@ -120,8 +147,8 @@ export default class SR6CritterActorData extends SR6BaseActorData {
             skills: new fields.SchemaField(skills),
             edge: new srFields.SR6EdgeAttributeField(),
             health: new fields.SchemaField({
-                physicalCM: new srFields.SR6ConditionMonitorField(),
-                stunCM: new srFields.SR6ConditionMonitorField()
+                physicalCM: new SR6CritterMonitorField(),
+                stunCM: new SR6CritterMonitorField()
             }),
             initiative: new fields.SchemaField({
                 physical: new SR6CritterInitiativeField(),
@@ -206,7 +233,13 @@ export default class SR6CritterActorData extends SR6BaseActorData {
 
         self.health.physicalCM.max = result.health.physicalMax;
         self.health.stunCM.max = result.health.stunMax;
+        // A null value is "not decided yet": resolve it in memory from the legacy damage migration recorded, now that the
+        // maximum includes effects. Overflow follows the resolved physical value.
+        for (const monitor of [self.health.physicalCM, self.health.stunCM]) {
+            if (monitor.value === null) monitor.value = monitor.max - (monitor.pendingDamage ?? 0);
+        }
         if (self.health.overflow) {
+            self.health.overflow.dmg = Math.max(0, -self.health.physicalCM.value);
             self.health.overflow.max = result.health.overflowMax;
             self.health.overflow.value = self.health.overflow.max - self.health.overflow.dmg;
         }

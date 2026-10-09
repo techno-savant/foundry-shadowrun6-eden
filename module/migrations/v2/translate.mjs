@@ -27,14 +27,14 @@ export function translateUpdate(changes, doc, table, { warn = console.warn } = {
         if (typeof entry.translate !== "function" || !hasPath(diff, entry.from)) continue;
         const original = getPath(diff, entry.from);
         const out = entry.translate(diff, doc);
-        if (out && "value" in out) setPath(diff, entry.to, out.value);
+        if (out && "value" in out) setPath(diff, entry.translateTo ?? entry.to, out.value);
         deletePath(diff, entry.from);
         const flagPath = `flags.${FLAG_SCOPE}.v1.${entry.from}`;
         if (!hasPath(changes, flagPath) && !hasPath(doc ?? {}, flagPath)) setPath(changes, flagPath, original);
         translated.push(entry.from);
         if (!warned.has(entry.from)) {
             warned.add(entry.from);
-            warn(`SR6E | update used the old path system.${entry.from}; use system.${entry.to}. It was translated for you.`);
+            warn(`SR6E | update used the old path system.${entry.from}; use system.${entry.translateTo ?? entry.to}. It was translated for you.`);
         }
     }
     return { translated };

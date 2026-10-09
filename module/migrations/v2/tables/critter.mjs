@@ -56,24 +56,26 @@ function splitSpecializations(src, skill, ctx) {
     return { specializations, unknown };
 }
 
-/** A monitor transform: V2 stores boxes remaining, so value = max - dmg (- overflow dmg for the physical monitor). */
-function monitorTransform(monitor, attribute, withOverflow) {
+/**
+ * A monitor transform (Decision 5c): migration cannot know the maximum WITH effects, so it does not compute boxes
+ * remaining. It records the legacy damage (plus overflow damage for the physical monitor) as `pendingDamage`; prepare
+ * resolves `value` from it. A V2 value already present (not null) wins, so the entry then writes nothing.
+ */
+function monitorTransform(monitor, withOverflow) {
+    const v2 = monitor === "physical" ? "physicalCM" : "stunCM";
     return (src) => {
-        const pool = legacyPool(src, attribute);
-        const max = 8 + Math.round(pool / 2) + num(getPath(src, `${monitor}.mod`), 0);
+        const existing = getPath(src, `health.${v2}.value`);
+        if (existing !== undefined && existing !== null) return {};
         const dmg = Math.max(0, num(getPath(src, `${monitor}.dmg`), 0));
         const overflow = withOverflow ? Math.max(0, num(getPath(src, "overflow.dmg"), 0)) : 0;
-        return {
-            value: Math.trunc(max - dmg - overflow),
-            extra: { [`health.${monitor === "physical" ? "physicalCM" : "stunCM"}.max`]: Math.max(8, Math.trunc(max)) }
-        };
+        return { value: Math.trunc(dmg + overflow) };
     };
 }
 
 /**
- * Complete a monitor transform for a partial update diff that carries only the damage. Reads the document's
- * current (prepared) V2 monitor: `max` is the box count prepare keeps there, and for the physical monitor the
- * overflow already taken is the part of `value` below zero.
+ * Complete a monitor write for a partial update diff that carries only the damage. A live update has the prepared
+ * document, so it writes the number directly: value = max (with effects) - dmg - overflow already taken, where the
+ * overflow is the part of the current `value` below zero. Any monitor change persists a number into `value`.
  */
 function monitorTranslate(monitor, v2Monitor) {
     return (diffSystem, doc) => {
@@ -119,23 +121,23 @@ export function buildCritterTable() {
 
     // ---- condition monitors (V2 stores boxes remaining)
     table.push({
-        from: "physical.dmg", to: "health.physicalCM.value", kind: "transform", needs: [["attributes.bod.base", "attributes.body.rank"]],
+        from: "physical.dmg", to: "health.physicalCM.pendingDamage", translateTo: "health.physicalCM.value", kind: "transform", needs: [["attributes.bod.base", "attributes.body.rank"]],
         records: ["overflow.dmg", "physical.mod"],
-        transform: monitorTransform("physical", "bod", true), translate: monitorTranslate("physical", "physicalCM"),
-        note: "value = max - dmg - overflow.dmg, max = 8 + round(BOD pool / 2) + physical.mod (actor.js:1066-1074); negative means overflow"
+        transform: monitorTransform("physical", true), translate: monitorTranslate("physical", "physicalCM"),
+        note: "pendingDamage = dmg + overflow.dmg; prepare resolves a null value to max (with effects) - pendingDamage (Decision 5c)"
     });
     table.push({
-        from: "stun.dmg", to: "health.stunCM.value", kind: "transform", needs: [["attributes.wil.base", "attributes.willpower.rank"]],
+        from: "stun.dmg", to: "health.stunCM.pendingDamage", translateTo: "health.stunCM.value", kind: "transform", needs: [["attributes.wil.base", "attributes.willpower.rank"]],
         records: ["stun.mod"],
-        transform: monitorTransform("stun", "wil", false), translate: monitorTranslate("stun", "stunCM"),
-        note: "value = max - dmg, max = 8 + round(WIL pool / 2) + stun.mod (actor.js:1075-1080)"
+        transform: monitorTransform("stun", false), translate: monitorTranslate("stun", "stunCM"),
+        note: "pendingDamage = dmg; prepare resolves a null value to max (with effects) - pendingDamage (Decision 5c)"
     });
     for (const monitor of ["physical", "stun"]) {
         // The stored value has no V2 home; effects add to the in-memory bag health.<monitor>CM.mod, which prepare reads
         table.push({ from: `${monitor}.mod`, kind: "flag", effectTo: `health.${monitor === "physical" ? "physicalCM" : "stunCM"}.mod`, note: "stored value has no V2 home (V1b-2 decides); effects move to the in-memory modifier bag" });
         for (const leaf of ["base", "value", "max", "modString"]) table.push({ from: `${monitor}.${leaf}`, kind: "derived", note: "recomputed from attributes and damage" });
     }
-    table.push({ from: "overflow.dmg", kind: "derived", note: "folded into health.physicalCM.value (see physical.dmg); original recorded in the v1 copy" });
+    table.push({ from: "overflow.dmg", kind: "derived", note: "folded into health.physicalCM.pendingDamage (see physical.dmg); original recorded in the v1 copy" });
     table.push({ from: "overflow.mod", kind: "flag", effectTo: "health.overflowMod", note: "stored value has no V2 home (V1b-2 decides); effects move to the in-memory modifier bag" });
     for (const leaf of ["modString", "value", "max"]) table.push({ from: `overflow.${leaf}`, kind: "derived", note: "overflow is derived from the physical monitor in V2" });
 

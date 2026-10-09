@@ -12,6 +12,7 @@
  *   derived   deliberately dropped: recomputed by prepare, or vestigial (`note` says which)
  * `clamp` is { min?, max?, int?, default? }: numbers are coerced, rounded (int), clamped, and the original is
  * kept in the v1 copy whenever the value had to change.
+ * `translateTo` (optional) is where translateUpdate writes a completed value when it differs from `to`.
  * `records` lists extra legacy paths whose originals a transform folds in; they go to the v1 copy too.
  * `needs` entries are paths that must exist; an array entry means any one of them (a legacy path or its V2 name).
  * `effectTo` is where an ACTIVE EFFECT key on `from` moves, when that differs from the data (a flag entry's value has no V2
