@@ -33,6 +33,7 @@ import * as documents from "./documents/_module.mjs";
 import * as applications from "./applications/_module.mjs";
 import * as rollTypes from "./dice/RollTypes.js";
 import * as migrations from "./migrations/v2/index.mjs";
+import { schemaDeclares } from "./migrations/v2/schema-paths.mjs";
 
 /**
  * Init hook. Called from Foundry when initializing the world
@@ -126,7 +127,8 @@ Hooks.once("init", async function () {
      */
     Object.assign(CONFIG.Actor.dataModels, {
         sprite: datamodels.SR6SpriteActorData,
-        host: datamodels.SR6HostActorData
+        host: datamodels.SR6HostActorData,
+        Critter: datamodels.SR6CritterActorData
     });
 
     CONFIG.Actor.defaultType = "Player";
@@ -134,10 +136,27 @@ Hooks.once("init", async function () {
     const Actors = foundry.documents.collections.Actors;
     Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
     Actors.registerSheet("shadowrun6-eden", applications.Shadowrun6ActorSheetPC, { types: ["Player"], makeDefault: true });
-    Actors.registerSheet("shadowrun6-eden", applications.Shadowrun6ActorSheetNPC, { types: ["NPC", "Critter", "Spirit"], makeDefault: true });
+    Actors.registerSheet("shadowrun6-eden", applications.Shadowrun6ActorSheetNPC, { types: ["NPC", "Spirit"], makeDefault: true });
+    Actors.registerSheet("shadowrun6-eden", /** @type {any} */ (applications.SR6CritterActorSheet), { types: ["Critter"], makeDefault: true });
     Actors.registerSheet("shadowrun6-eden", applications.Shadowrun6ActorSheetVehicle, { types: ["Vehicle"], makeDefault: true });
     Actors.registerSheet("shadowrun6-eden", applications.SR6SpriteActorSheet, { types: ["sprite"], makeDefault: true });
     Actors.registerSheet("shadowrun6-eden", applications.SR6HostActorSheet, { types: ["host"], makeDefault: true });
+
+    /**
+     * Token bars of new V2 actors that keep boxes remaining in health.<physical|stun>CM. The system-wide defaults in
+     * system.json ("physical"/"stun") stay for the legacy types, so they are replaced per actor here (design Decision 4).
+     */
+    Hooks.on("preCreateActor", (actor, data) => {
+        const model = CONFIG.Actor.dataModels[actor.type];
+        if (!model || !schemaDeclares(/** @type {any} */ (model).schema, "health.physicalCM")) return;
+        const bars = { bar1: "health.physicalCM", bar2: "health.stunCM" };
+        const changes = {};
+        for (const [bar, attribute] of Object.entries(bars)) {
+            const current = foundry.utils.getProperty(data, `prototypeToken.${bar}.attribute`);
+            if (!current || current === "physical" || current === "stun") changes[`prototypeToken.${bar}.attribute`] = attribute;
+        }
+        if (Object.keys(changes).length) actor.updateSource(changes);
+    });
 
     /**
      * Item document configuration (Datamodel > Document > Sheet)

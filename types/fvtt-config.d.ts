@@ -8,6 +8,7 @@ import type Shadowrun6Combatant from "../module/Shadowrun6Combatant.js";
 import type SR6Token from "../module/placeables/SR6Token.js";
 import type SR6SpriteActorData from "../module/datamodels/sprite-actor-data.mjs";
 import type SR6HostActorData from "../module/datamodels/host-actor-data.mjs";
+import type SR6CritterActorData from "../module/datamodels/critter-actor-data.mjs";
 import type SR6ModItemData from "../module/datamodels/mod-item-data.mjs";
 import type SR6SoftwareItemData from "../module/datamodels/software-item-data.mjs";
 import type SR6EchoItemData from "../module/datamodels/echo-item-data.mjs";
@@ -45,7 +46,7 @@ declare module "fvtt-types/configuration" {
     Token: typeof SR6Token;
   }
   interface DataModelConfig {
-    Actor: { sprite: typeof SR6SpriteActorData; host: typeof SR6HostActorData };
+    Actor: { sprite: typeof SR6SpriteActorData; host: typeof SR6HostActorData; Critter: typeof SR6CritterActorData };
     Item: {
       mod: typeof SR6ModItemData;
       software: typeof SR6SoftwareItemData;
@@ -75,7 +76,6 @@ declare module "fvtt-types/configuration" {
     Actor: {
       Player: LegacySystem;
       NPC: LegacySystem;
-      Critter: LegacySystem;
       Spirit: LegacySystem;
       Vehicle: LegacySystem;
     };
@@ -84,7 +84,6 @@ declare module "fvtt-types/configuration" {
     Actor: {
       Player: LegacySystem;
       NPC: LegacySystem;
-      Critter: LegacySystem;
       Spirit: LegacySystem;
       Vehicle: LegacySystem;
     };

@@ -13,13 +13,13 @@ export async function rollbackV2(type) {
     let effects = 0;
     let tokens = 0;
 
-    const restoreEffects = async (collection) => {
+    const restoreEffects = async (owner) => {
         const updates = [];
-        for (const effect of collection) {
+        for (const effect of owner.effects) {
             const changes = getPath(effect.flags ?? {}, `${FLAG_SCOPE}.v1Changes`);
             if (changes) updates.push({ _id: effect.id, changes });
         }
-        if (updates.length) await collection.documentClass.updateDocuments(updates, { parent: collection.parent });
+        if (updates.length) await owner.effects.documentClass.updateDocuments(updates, { parent: owner });
         effects += updates.length;
     };
     const barUpdate = (doc) => {
@@ -29,15 +29,14 @@ export async function rollbackV2(type) {
     };
 
     for (const actor of game.actors.filter((a) => a.type === type)) {
-        await restoreEffects(actor.effects);
-        for (const item of actor.items) await restoreEffects(item.effects);
+        await restoreEffects(actor);
+        for (const item of actor.items) await restoreEffects(item);
         const update = barUpdate(actor.prototypeToken);
         if (update) {
             await actor.update(Object.fromEntries(Object.entries(update).map(([k, v]) => [`prototypeToken.${k}`, v])));
             tokens++;
         }
     }
-    for (const item of game.items) await restoreEffects(item.effects);
     for (const scene of game.scenes) {
         const updates = [];
         for (const token of scene.tokens) {

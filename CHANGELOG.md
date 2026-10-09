@@ -1,12 +1,21 @@
 ## 4.0.10
 
+### New Features
+- Critters have a new actor sheet and now use a data model, in the same style as Sprites and Hosts. The sheet shows the monitors and Edge coin, attributes and Essence, physical and astral initiative, skills, critter powers, weapons, defense and soak pools, effects, and description and notes.
+
 ### Data Updates
+- The first time a GM opens a world with this version, a dialog asks them to back up the world, then converts every Critter: its data, its active effects' keys, token resource bars and unlinked tokens' damage. The old values stay in the database. If something goes wrong, run the macro `game.sr6.migrations.rollbackV2('Critter')` before going back to the previous version: it restores the effect keys and token bars. Changes made to Critters after the conversion do not carry back.
+- On a converted Critter, active effects that override or add to the Agility or Strength *pool* (for example cyberlimbs) no longer change anything and log a warning, because the new data model has no writable pool. Effects on the Agility and Strength modifiers, and all other effects, keep working.
+- New Critters get their token bars set to the new physical and stun monitors.
 - Echo, Focus, Adept Power, Metamagic, Martial Art Technique, Martial Art Style, Lifestyle, Critter Power and Ritual items now use data models; unknown `system` fields on them are no longer kept.
 - Contact, SIN, Skill, Quality, Complex Form, Sprite Power and Spell items now use data models; unknown `system` fields on them are no longer kept.
 - All items based on the Genesis template (including the types above) gain Availability and Price fields.
 - An empty (0) page reference on these items is now blank, and book names that are not one of the known books are cleared.
 - Contacts that were saved with the misspelled `loyality` value now load it as Loyalty.
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
+
+### Bug Fixes
+- Fix the Edge coin on Sprite and Host sheets, which read and wrote the wrong field.
 
 ## 4.0.9
 

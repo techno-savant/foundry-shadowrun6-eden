@@ -7,8 +7,8 @@ import { TABLES } from "./tables/index.mjs";
 /** fvtt-types only knows core setting keys; our own are registered at init. */
 const settings = () => /** @type {any} */ (game.settings);
 
-/** Actor types whose world data this runner migrates. EMPTY in V1a: nothing is switched on. V1b adds "Critter". */
-export const ENABLED_TYPES = [];
+/** Actor types whose world data this runner migrates. V1b-2 switches Critter on; further types are added by their own slices. */
+export const ENABLED_TYPES = ["Critter"];
 
 /** Identifies this migration in the world setting, so each world runs it once. */
 export const MIGRATION_ID = "v2-actors-1";
@@ -37,7 +37,12 @@ export async function maybeRunV2Migration() {
     return { ran: true };
 }
 
-/** Migrate every world document that belongs to one actor type. Plain dotted-path updates only (same on Foundry 13 and 14). */
+/**
+ * Migrate every world document that belongs to one actor type. Plain dotted-path updates only (same on Foundry 13 and 14).
+ * Note: once the type's model is registered, `actor.toObject().system` is already the migrated and cleaned V2 source, so
+ * the actor-system part of the plan has little to add; effects, prototype tokens, scene tokens and token deltas are
+ * stored as raw data and are where this run writes.
+ */
 async function migrateType(type) {
     const table = TABLES[type];
     const model = CONFIG.Actor.dataModels[type];
@@ -56,13 +61,14 @@ async function migrateType(type) {
         const data = { _id: actor.id, ...update };
         if (bars) for (const [path, value] of Object.entries(bars.update)) data[`prototypeToken.${path}`] = value;
         if (Object.keys(data).length > 1) actorUpdates.push(data);
-        await updateEffects(actor.effects, keyMap);
-        for (const item of actor.items) await updateEffects(item.effects, keyMap);
+        await updateEffects(actor, keyMap);
+        for (const item of actor.items) await updateEffects(item, keyMap);
     }
     if (actorUpdates.length) await Actor.updateDocuments(actorUpdates);
 
-    // world items' effects that target this type are reached through the same key map
-    for (const item of game.items) await updateEffects(item.effects, keyMap);
+    // World items are not touched: an unowned item's effects apply to whatever actor later owns it (a legacy Player, say), so
+    // rewriting their keys here would break them. Critter-owned items are handled above; the rest convert when they land on
+    // a V2 actor (migrateData and the effect _preCreate conversion).
 
     // scene tokens: resource bars, and unlinked token deltas
     for (const scene of game.scenes) {
@@ -83,11 +89,12 @@ async function migrateType(type) {
     }
 }
 
-async function updateEffects(collection, keyMap) {
+/** Rewrite the effect keys of one owner (an Actor or an Item). An embedded collection has no `parent`, so the owner is passed explicitly. */
+async function updateEffects(owner, keyMap) {
     const updates = [];
-    for (const effect of collection) {
+    for (const effect of owner.effects) {
         const plan = planEffect(effect.toObject(), keyMap);
         if (plan) updates.push({ _id: effect.id, ...plan.update });
     }
-    if (updates.length) await collection.documentClass.updateDocuments(updates, { parent: collection.parent });
+    if (updates.length) await owner.effects.documentClass.updateDocuments(updates, { parent: owner });
 }
