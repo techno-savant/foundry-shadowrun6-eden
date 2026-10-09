@@ -139,24 +139,25 @@ export function planTokenBars(tokenData) {
 
 /**
  * Plan an unlinked token's delta: rewrite old-name keys inside `delta.system`, so a delta never carries old keys
- * that a rebuilt synthetic actor would merge over the migrated base. Transforms a partial delta can't run alone
- * (`physical.dmg` needs the monitor's max, which comes from BOD) are computed on the base actor's data merged with
- * the delta, so the token's own damage is kept (design Decision 5).
+ * that a rebuilt synthetic actor would merge over the migrated base. A delta with legacy monitor damage gets
+ * `health.<m>CM.pendingDamage` and a null `value` (no base needed; design Decision 5c), so the token keeps its own damage.
  * @param {object} deltaSystem
  * @param {object[]} table
- * @param {{ctx?: object, isV2Path?: (path: string) => boolean, base?: object}} [options]   `base` is the base actor's system source
+ * @param {{ctx?: object, isV2Path?: (path: string) => boolean}} [options]
  * @returns {{update: Record<string, any>}|null}
  */
-export function planDelta(deltaSystem, table, { ctx, isV2Path, base } = {}) {
+export function planDelta(deltaSystem, table, { ctx, isV2Path } = {}) {
     if (!deltaSystem || !Object.keys(deltaSystem).length) return null;
     const result = applyV2Renames(structuredClone(deltaSystem), table, { partial: true, ctx, isV2Path });
-    if (base && result.skipped.length) {
-        const merged = mergePlain(structuredClone(base), structuredClone(deltaSystem));
-        for (const entry of table) {
-            if (entry.kind !== "transform" || !result.skipped.includes(entry.from) || !entry.to) continue;
-            const out = entry.transform(merged, ctx ?? {}, { partial: false });
-            if (out && "value" in out && !hasPath(result.source, entry.to)) setPath(result.source, entry.to, out.value);
-        }
+    // A delta carrying legacy damage and no V2 value of its own: record the damage as pending and null the value, so the
+    // base actor's settled number can't win the merge. No base context is needed (Decision 5c); a delta with its own V2
+    // value makes the transform return nothing and is left alone.
+    for (const entry of table) {
+        if (entry.kind !== "transform" || !entry.translateTo || !hasPath(deltaSystem, entry.from)) continue;
+        const out = entry.transform(deltaSystem, ctx ?? {}, { partial: true });
+        if (!out || !("value" in out)) continue;
+        setPath(result.source, entry.to, out.value);
+        setPath(result.source, entry.translateTo, null);
     }
     const update = {};
     for (const leaf of leafPaths(result.source)) {
@@ -164,13 +165,4 @@ export function planDelta(deltaSystem, table, { ctx, isV2Path, base } = {}) {
         if (!sameValue(getPath(deltaSystem, leaf), value)) update[`delta.system.${leaf}`] = value;
     }
     return Object.keys(update).length ? { update } : null;
-}
-
-/** Deep-merge plain objects (b over a), like Foundry's mergeObject for the data we handle here. */
-function mergePlain(a, b) {
-    for (const [key, value] of Object.entries(b)) {
-        if (value && typeof value === "object" && !Array.isArray(value) && a[key] && typeof a[key] === "object") mergePlain(a[key], value);
-        else a[key] = value;
-    }
-    return a;
 }

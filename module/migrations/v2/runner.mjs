@@ -98,9 +98,8 @@ async function migrateType(type) {
             const bars = planTokenBars(token.toObject());
             if (bars) Object.assign(data, bars.update);
             if (!token.actorLink) {
-                const base = token.baseActor?.toObject().system;
                 const deltaData = token.delta?.toObject();
-                const delta = planDelta(deltaData?.system, table, { ...options, base });
+                const delta = planDelta(deltaData?.system, table, options);
                 if (delta) Object.assign(data, delta.update);
                 // effects and items added to this one token live in its delta, which the actor pass never sees
                 const deltaEffects = planDeltaEffects(deltaData, keyMap);
