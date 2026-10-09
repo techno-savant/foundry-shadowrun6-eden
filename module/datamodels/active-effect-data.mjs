@@ -1,3 +1,5 @@
+import { effectKeyMapFor, hasEffectTable } from "../migrations/v2/effect-keys.mjs";
+
 export default class SR6ActiveEffectData extends foundry.abstract.TypeDataModel {
   
   static defineSchema() {
@@ -136,12 +138,16 @@ export default class SR6ActiveEffectData extends foundry.abstract.TypeDataModel 
     const actor = [this.parent?.parent, this.parent?.parent?.parent]
                   .find((candidate) => candidate instanceof game.sr6.documents.Shadowrun6Actor);
 
+    // An effect on an unowned item has no actor to convert for; it is converted where it is applied (actor.js, Decision 5b)
+    if (!actor) return false;
+
     if (actor.system instanceof foundry.abstract.DataModel) {
       let converted = false;
 
       for (const change of data.changes ?? []) {
-        const newKey = CONFIG.SR6.EFFECT_CONVERSION_TOV2[change.key];
-        if (!newKey) continue;
+        const newKey = effectKeyMapFor(actor.type)[change.key];
+        // no target, or (for a type with a table) a key that stays as it is
+        if (!newKey || (hasEffectTable(actor.type) && newKey === change.key)) continue;
         change.key = newKey;
         converted = true;
       }

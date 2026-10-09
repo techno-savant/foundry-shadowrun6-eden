@@ -5,6 +5,7 @@
 
 ### Data Updates
 - Critters use the new format as soon as this version loads. The first time a GM opens a world with it, a dialog ("Convert now" / "Ask me next time") asks them to back up the world, then moves the Critters' active effects (including effects and items that exist only on one unlinked token), token resource bars and unlinked tokens' damage to the new keys. The old values are kept. If the conversion stops part-way, a message says so, nothing is lost, and you are asked again next time. To undo it, run the macro `game.sr6.migrations.rollbackV2('Critter')` before going back to the previous version: it restores the effect keys and token bars. Changes made to Critters after the conversion do not carry back.
+- Effects that change a Critter's physical or stun monitor (for example Build Tough and Glass Jaw) work on Critters, whichever way the effect reached them, including items given to a Critter later.
 - On a converted Critter, active effects that override or add to the Agility or Strength *pool* (for example cyberlimbs) no longer change anything and log a warning, because the new data model has no writable pool. Effects on the Agility and Strength modifiers, and all other effects, keep working.
 - New Critters get their token bars set to the new physical and stun monitors.
 - Echo, Focus, Adept Power, Metamagic, Martial Art Technique, Martial Art Style, Lifestyle, Critter Power and Ritual items now use data models; unknown `system` fields on them are no longer kept.
