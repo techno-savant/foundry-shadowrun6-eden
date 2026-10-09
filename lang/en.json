@@ -2513,9 +2513,11 @@
     "Migration": {
       "V2": {
         "backupTitle": "Back up your world",
-        "backupContent": "Shadowrun 6 Eden is about to convert actor data to the new format. Old values are kept, but please take a world backup first (Setup, Backups). Migrate now?",
-        "now": "Migrate now",
-        "later": "Later",
+        "backupContent": "Critters already use the new format in this version. Converting also moves their effects and token bars, and unlinked tokens' damage. Old values are kept, but please take a world backup first (Setup, Backups). Convert now?",
+        "now": "Convert now",
+        "later": "Ask me next time",
+        "started": "Shadowrun 6 Eden: converting Critters. Please wait.",
+        "failed": "Shadowrun 6 Eden: the Critter conversion stopped part-way. Nothing was lost; you will be asked again next time. See the console.",
         "done": "Shadowrun 6 Eden: actor data migration finished."
       }
     },

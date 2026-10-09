@@ -74,6 +74,49 @@ export function planEffect(effectData, keyMap) {
     return { update };
 }
 
+/** Apply a planEffect result to a full effect object (delta effects are replaced whole, not updated by path). */
+function withEffectPlan(effect, plan) {
+    const out = structuredClone(effect);
+    out.changes = plan.update.changes;
+    const v1 = plan.update[`flags.${FLAG_SCOPE}.v1Changes`];
+    if (v1) setPath(out, `flags.${FLAG_SCOPE}.v1Changes`, v1);
+    return out;
+}
+
+/**
+ * Plan the effects that live in an unlinked token's delta: `delta.effects` and each `delta.items[i].effects`. They are stored
+ * on the token, not on the actor, so the actor pass never sees them, and an old key would silently stop applying. Arrays are
+ * sent whole because Foundry replaces arrays in an update; originals stay in each effect's flags.<scope>.v1Changes.
+ * @param {{effects?: object[], items?: {effects?: object[]}[]}} delta   token.delta.toObject()
+ * @param {Record<string, string|null>} keyMap   from buildEffectKeyMap
+ * @returns {{update: Record<string, any>}|null}   null when nothing changes
+ */
+export function planDeltaEffects(delta, keyMap) {
+    if (!delta) return null;
+    const rewrite = (effects) => {
+        let changed = false;
+        const out = (effects ?? []).map((effect) => {
+            const plan = planEffect(effect, keyMap);
+            if (!plan) return effect;
+            changed = true;
+            return withEffectPlan(effect, plan);
+        });
+        return changed ? out : null;
+    };
+    const update = {};
+    const effects = rewrite(delta.effects);
+    if (effects) update["delta.effects"] = effects;
+    let itemsChanged = false;
+    const items = (delta.items ?? []).map((item) => {
+        const itemEffects = rewrite(item.effects);
+        if (!itemEffects) return item;
+        itemsChanged = true;
+        return { ...item, effects: itemEffects };
+    });
+    if (itemsChanged) update["delta.items"] = items;
+    return Object.keys(update).length ? { update } : null;
+}
+
 /**
  * Plan a token's resource bars (prototype tokens and scene tokens share the shape): physical -> health.physicalCM,
  * stun -> health.stunCM, with the old attribute kept in flags.<scope>.v1Bars.

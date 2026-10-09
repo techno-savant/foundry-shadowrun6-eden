@@ -37,15 +37,41 @@ export async function rollbackV2(type) {
             tokens++;
         }
     }
+    // delta effects of unlinked tokens come back from each effect's v1Changes, arrays sent whole
+    const restoreDeltaEffects = (effects) => {
+        let changed = false;
+        const out = (effects ?? []).map((effect) => {
+            const changes = getPath(effect.flags ?? {}, `${FLAG_SCOPE}.v1Changes`);
+            if (!changes) return effect;
+            changed = true;
+            return { ...effect, changes };
+        });
+        return changed ? out : null;
+    };
     for (const scene of game.scenes) {
         const updates = [];
         for (const token of scene.tokens) {
             if (token.actor?.type !== type) continue;
-            const update = barUpdate(token);
-            if (update) updates.push({ _id: token.id, ...update });
+            const update = barUpdate(token) ?? {};
+            if (!token.actorLink) {
+                const delta = token.delta?.toObject();
+                const deltaEffects = restoreDeltaEffects(delta?.effects);
+                if (deltaEffects) update["delta.effects"] = deltaEffects;
+                let itemsChanged = false;
+                const items = (delta?.items ?? []).map((item) => {
+                    const itemEffects = restoreDeltaEffects(item.effects);
+                    if (!itemEffects) return item;
+                    itemsChanged = true;
+                    return { ...item, effects: itemEffects };
+                });
+                if (itemsChanged) update["delta.items"] = items;
+            }
+            if (Object.keys(update).length) {
+                updates.push({ _id: token.id, ...update });
+                tokens++;
+            }
         }
         if (updates.length) await scene.updateEmbeddedDocuments("Token", updates);
-        tokens += updates.length;
     }
     return { effects, tokens };
 }

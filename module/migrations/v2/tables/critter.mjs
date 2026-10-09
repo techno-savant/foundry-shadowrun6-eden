@@ -28,12 +28,14 @@ const num = (value, dflt = 0) => {
 
 /**
  * Legacy attribute pool: max(0, base + min(4, mod)), with the base forced to at least 1 (actor.js:1027-1043).
- * Reads the legacy keys, or the V2 `rank`/`mod` when the source is already V2 (a token delta's base actor).
+ * Reads the V2 `rank`/`mod` FIRST when present, then the legacy keys: "new wins" holds for inputs too, so after a Body
+ * edit in the new sheet the stored legacy `bod.base` (kept in the database for rollback) no longer feeds the monitor
+ * (design Decision 5a). A source that is already V2 (a token delta's base actor) has only the V2 keys.
  */
 const legacyPool = (src, id) => {
     const v2 = Object.values(ATTRIBUTES).includes(id) ? id : ATTRIBUTES[id];
-    const base = Math.max(1, num(getPath(src, `attributes.${id}.base`) ?? getPath(src, `attributes.${v2}.rank`), 1));
-    return Math.max(0, base + Math.min(4, num(getPath(src, `attributes.${id}.mod`) ?? getPath(src, `attributes.${v2}.mod`), 0)));
+    const base = Math.max(1, num(getPath(src, `attributes.${v2}.rank`) ?? getPath(src, `attributes.${id}.base`), 1));
+    return Math.max(0, base + Math.min(4, num(getPath(src, `attributes.${v2}.mod`) ?? getPath(src, `attributes.${id}.mod`), 0)));
 };
 
 /** Normalise a free-text specialization to the id form skill_special uses ("Free Fall" -> "free_fall"). */

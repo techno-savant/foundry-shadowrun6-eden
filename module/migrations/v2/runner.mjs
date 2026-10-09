@@ -1,6 +1,6 @@
 import { SYSTEM_NAME } from "../../constants.js";
 import { FLAG_SCOPE } from "./table.mjs";
-import { buildEffectKeyMap, planActor, planDelta, planEffect, planTokenBars } from "./plan.mjs";
+import { buildEffectKeyMap, planActor, planDelta, planDeltaEffects, planEffect, planTokenBars } from "./plan.mjs";
 import { schemaDeclares } from "./schema-paths.mjs";
 import { TABLES } from "./tables/index.mjs";
 
@@ -16,7 +16,7 @@ export const MIGRATION_ID = "v2-actors-1";
 /**
  * Run the legacy -> V2 world migration for the enabled actor types. GM only, once per world per migration id, behind
  * a backup prompt. With no enabled types it returns immediately and touches nothing.
- * @returns {Promise<{ran: boolean, reason?: string}>}
+ * @returns {Promise<{ran: boolean, reason?: string, error?: unknown}>}
  */
 export async function maybeRunV2Migration() {
     if (!ENABLED_TYPES.length) return { ran: false, reason: "no enabled types" };
@@ -31,10 +31,29 @@ export async function maybeRunV2Migration() {
     });
     if (!confirmed) return { ran: false, reason: "postponed" };
 
-    for (const type of ENABLED_TYPES) await migrateType(type);
+    ui.notifications.info(game.i18n.localize("SR6.Migration.V2.started"));
+    try {
+        for (const type of ENABLED_TYPES) await migrateType(type);
+    } catch (error) {
+        // v2MigrationId stays unset, so the next GM load asks again. Partial writes are idempotent: a converted effect key no
+        // longer matches the map, v1Changes/v1Bars are written once, and bars and deltas that already moved produce no change.
+        console.error(`SR6E | V2 migration stopped at ${error?.migrationStep ?? "an unknown step"}:`, error);
+        ui.notifications.error(game.i18n.localize("SR6.Migration.V2.failed"));
+        return { ran: false, reason: "failed", error };
+    }
     await settings().set(SYSTEM_NAME, "v2MigrationId", MIGRATION_ID);
     ui.notifications.info(game.i18n.localize("SR6.Migration.V2.done"));
     return { ran: true };
+}
+
+/** Run one write and, on failure, tag the error with what was being written so the console names the failing document. */
+async function step(label, write) {
+    try {
+        return await write();
+    } catch (error) {
+        if (error && typeof error === "object" && !error.migrationStep) error.migrationStep = label;
+        throw error;
+    }
 }
 
 /**
@@ -64,7 +83,7 @@ async function migrateType(type) {
         await updateEffects(actor, keyMap);
         for (const item of actor.items) await updateEffects(item, keyMap);
     }
-    if (actorUpdates.length) await Actor.updateDocuments(actorUpdates);
+    if (actorUpdates.length) await step(`Actor.updateDocuments [${actorUpdates.map((u) => u._id).join(", ")}]`, () => Actor.updateDocuments(actorUpdates));
 
     // World items are not touched: an unowned item's effects apply to whatever actor later owns it (a legacy Player, say), so
     // rewriting their keys here would break them. Critter-owned items are handled above; the rest convert when they land on
@@ -80,12 +99,16 @@ async function migrateType(type) {
             if (bars) Object.assign(data, bars.update);
             if (!token.actorLink) {
                 const base = token.baseActor?.toObject().system;
-                const delta = planDelta(token.delta?.toObject().system, table, { ...options, base });
+                const deltaData = token.delta?.toObject();
+                const delta = planDelta(deltaData?.system, table, { ...options, base });
                 if (delta) Object.assign(data, delta.update);
+                // effects and items added to this one token live in its delta, which the actor pass never sees
+                const deltaEffects = planDeltaEffects(deltaData, keyMap);
+                if (deltaEffects) Object.assign(data, deltaEffects.update);
             }
             if (Object.keys(data).length > 1) updates.push(data);
         }
-        if (updates.length) await scene.updateEmbeddedDocuments("Token", updates);
+        if (updates.length) await step(`scene ${scene.id} tokens [${updates.map((u) => u._id).join(", ")}]`, () => scene.updateEmbeddedDocuments("Token", updates));
     }
 }
 
@@ -96,5 +119,5 @@ async function updateEffects(owner, keyMap) {
         const plan = planEffect(effect.toObject(), keyMap);
         if (plan) updates.push({ _id: effect.id, ...plan.update });
     }
-    if (updates.length) await owner.effects.documentClass.updateDocuments(updates, { parent: owner });
+    if (updates.length) await step(`effects of ${owner.documentName ?? "document"} ${owner.id} [${updates.map((u) => u._id).join(", ")}]`, () => owner.effects.documentClass.updateDocuments(updates, { parent: owner }));
 }
