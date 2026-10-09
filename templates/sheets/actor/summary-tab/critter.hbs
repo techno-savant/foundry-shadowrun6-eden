@@ -1,0 +1,98 @@
+{{! Summary Tab for Critters }}
+<section
+  class='tab statblock scrollable {{tab.cssClass}}'
+  data-group='primary'
+  data-tab='summary'
+>
+
+<div class="stat-block">
+  <div class="stat-row">
+    {{#each statblock as |attr|}}
+    <div class="stat" data-for="{{attr.field.fieldPath}}">
+      <div class="stat-label"
+        {{#if attr.rollType}}data-tooltip="{{localize 'SR6.title.rollSomething' typeOfRoll=attr.field.label}}" data-action="roll" data-roll-type="{{attr.rollType}}" data-attribute-path="{{attr.field.fieldPath}}"{{else}}data-tooltip="{{attr.field.label}}"{{/if}}>
+        {{localize (concat "SR6.statblock." attr.field.fieldPath)}}
+      </div>
+      <div class="stat-value">
+        {{#if @root.editMode}}
+          {{formInput attr.field value=attr.value localize=true actor=@root.actor}}
+        {{else}}
+          {{span attr.value attr.field}}
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="content">
+    {{! Initiative: inputs bind to the stored values, the effective values are read-only and have no name }}
+    <div class="row initiatives">
+      {{#each initiatives as |init|}}
+      <div class="initiative" data-for="{{init.field.fieldPath}}">
+        <span class="label">
+          <a data-tooltip="{{localize 'SR6.title.rollSomething' typeOfRoll=init.field.label}}" data-action="roll" data-roll-type="initiative" data-attribute-path="{{init.field.fieldPath}}">{{init.field.label}}</a>:
+        </span>
+        <strong class="initiative-effective" data-tooltip="{{localize 'SR6.Actor.critter.initiative.effective'}}">{{init.effective.rank}} + {{init.effective.dice}}D6</strong>
+        {{#if @root.editMode}}
+        <span class="initiative-stored">
+          <label>{{localize "SR6.Actor.critter.initiative.mod"}} <input type="number" name="system.initiative.{{init.key}}.mod" value="{{init.stored.mod}}" step="1"></label>
+          <label>{{localize "SR6.Actor.critter.initiative.dice"}} <input type="number" name="system.initiative.{{init.key}}.dice" value="{{init.stored.dice}}" min="1" max="5" step="1"></label>
+          <label>{{localize "SR6.Actor.critter.initiative.diceMod"}} <input type="number" name="system.initiative.{{init.key}}.diceMod" value="{{init.stored.diceMod}}" step="1"></label>
+        </span>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+
+    {{#if skillRows.length}}
+    <div class="row skills">
+      <span class="label">{{localize "SR6.label.activeSkills"}}:</span>
+      {{#if @root.editMode}}
+      <p>
+        {{#each skillRows as |skill|}}
+          <label>{{skill.label}} <input type="number" name="system.skills.{{skill.id}}.rank" value="{{skill.rank}}" min="0" step="1"></label>
+        {{/each}}
+      </p>
+      {{else}}
+      <p>
+        {{#each skillRows as |skill|}}
+          <a data-action="roll" data-roll-type="skill" data-skill="{{skill.id}}" data-tooltip="{{skillHint @root.actor skill.id}}">{{skill.label}}</a> <strong>{{skill.pool}}</strong>{{#unless @last}}, {{/unless}}
+        {{/each}}
+      </p>
+      {{/if}}
+    </div>
+    {{/if}}
+
+    <div class="row defense">
+      <span class="label">{{localize "shadowrun6.section.defense"}}:</span>
+      <p>
+        {{#each defensePools.pools as |def|}}
+          <a data-action="roll" data-roll-type="attribute" data-attribute-path="system.defensePool.{{def.key}}">{{def.label}}</a> <strong>{{def.pool}}</strong>{{#unless @last}}, {{/unless}}
+        {{/each}}
+      </p>
+    </div>
+    <div class="row defense-rating">
+      <span class="label">{{localize "shadowrun6.defense_rating.physical"}}:</span>
+      <strong>{{defensePools.rating}}</strong>
+    </div>
+
+    {{#if powers}}
+    <div class="row powers">
+      <span class="label">{{localize "shadowrun6.section.critterpowers.title"}}:</span>
+      <p>
+        {{#each powers as |item|}}
+          <label class="item-name" data-item-id="{{item.id}}" data-action='itemDescToggle' data-tooltip="SR6.title.clickItemName">{{item.name}}</label>{{#unless @last}}, {{/unless}}
+        {{/each}}
+      </p>
+      {{#each powers as |item|}}
+      <div class="collapsible-content closed" data-item-id="{{item.id}}">
+        <div><strong>{{item.name}}</strong></div>
+        <div>{{{item.system.description}}}</div>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+</section>

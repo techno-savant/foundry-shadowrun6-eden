@@ -3071,3 +3071,16 @@ body.game .app a:hover .sr6-icon {
 .sr6 .spider .unassign {
     margin-left: 2px;
 }
+/* Critter sheet */
+.sr6.critter .stat-block .initiatives {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+.sr6.critter .stat-block .initiative-stored label {
+    margin-right: 6px;
+}
+.sr6.critter .stat-block .initiative-stored input,
+.sr6.critter .stat-block .skills input[type="number"] {
+    width: 3em;
+}

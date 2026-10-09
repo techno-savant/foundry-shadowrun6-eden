@@ -2690,6 +2690,19 @@
           }
         }
       },
+      "critter": {
+        "FIELDS": {
+          "metatype": {
+            "label": "Metatype"
+          }
+        },
+        "initiative": {
+          "mod": "Mod",
+          "dice": "Dice",
+          "diceMod": "Dice mod",
+          "effective": "Effective initiative"
+        }
+      },
       "sprite": {
         "TYPES": {
           "courier": "//COURIER//",
@@ -2968,11 +2981,17 @@
       "system.initiative.astral": "INIT",
       "system.initiative.physical": "INIT",
       "system.initiative.matrix": "INIT",
+      "system.attributes.body": "B",
+      "system.attributes.agility": "A",
+      "system.attributes.reaction": "R",
+      "system.attributes.strength": "S",
       "system.attributes.willpower": "W",
       "system.attributes.logic": "L",
       "system.attributes.intuition": "I",
       "system.attributes.charisma": "C",
-      "system.attributes.resonance": "RES"
+      "system.attributes.resonance": "RES",
+      "system.attributes.magic": "MAG",
+      "system.attributes.essence": "ESS"
     }
   }
 }
