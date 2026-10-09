@@ -533,7 +533,7 @@ export default class SR6Item extends Item {
     changes.sort((a, b) => a.priority - b.priority);
 
     // Temporarily change attackRating []  --- TODO: rework attackRating into an object completely
-    this.#attackRatingToObject();
+    this._attackRatingToObject();
 
     // Apply all changes
     for ( let change of changes ) {
@@ -559,7 +559,7 @@ export default class SR6Item extends Item {
     }
 
     // Change attackRating back to []
-    this.#attackRatingToArray();
+    this._attackRatingToArray();
 
     // Expand the set of final overrides
     this.overrides = foundry.utils.expandObject(overrides);
@@ -604,13 +604,13 @@ export default class SR6Item extends Item {
     return effects;
   }
   
-  #attackRatingToObject() {
+  _attackRatingToObject() {
     if (/** @type {SR6GearSystem} */ (this.system).attackRating === undefined) return;
 
     const arObj = {.../** @type {SR6GearSystem} */ (this.system).attackRating};
     /** @type {SR6GearSystem} */ (this.system).attackRating = arObj;
   }
-  #attackRatingToArray() {
+  _attackRatingToArray() {
     if (/** @type {SR6GearSystem} */ (this.system).attackRating === undefined) return;
 
     const arArray = Object.values(/** @type {SR6GearSystem} */ (this.system).attackRating);

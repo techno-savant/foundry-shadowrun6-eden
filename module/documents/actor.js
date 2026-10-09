@@ -8,7 +8,7 @@ import { RollType, DefenseRoll, SoakType, SoakRoll, TokenData, InitiativeType, D
 import { getActor } from "../util/helper.js";
 import { SR6MatrixPanField } from "../datamodels/fields/fields.mjs";
 import { ATTACK_RATINGS, DEFENSE_POOLS, DEFENSE_RATINGS } from "../datamodels/derive/character.mjs";
-import { hasEffectTable, resolveEffectKey, safeApply, warnOnce } from "../migrations/v2/effect-keys.mjs";
+import { safeApply, translateChangeKey } from "../migrations/v2/effect-keys.mjs";
 const { DOCUMENT_OWNERSHIP_LEVELS } = foundry.CONST;
 
 function isLifeform(obj) {
@@ -282,7 +282,7 @@ export default class Shadowrun6Actor extends Actor {
 
             // V2 actors only: translate or skip the key on this in-memory clone (nothing is persisted), and never let one effect
             // break preparation (design Decision 5b)
-            if ( isV2 && !this.#translateEffectKey(change) ) continue;
+            if ( isV2 && !translateChangeKey(this.type, change) ) continue;
 
             const changes = isV2 ? safeApply(() => change.effect.apply(this, change), change.effect.name) : change.effect.apply(this, change);
             Object.assign(overrides, changes);
@@ -290,23 +290,6 @@ export default class Shadowrun6Actor extends Actor {
 
         // Expand the set of final overrides
         this.overrides = foundry.utils.expandObject(overrides);
-    }
-
-    /**
-     * V2 actors with a rename table (Critter): move an effect change that still carries a legacy key to its V2 key, or drop it
-     * when the key has no target. Changes the in-memory clone only. Other V2 actors, and keys that are already V2, pass through.
-     * @param {{key: string, effect: {name: string}}} change
-     * @returns {boolean} false when the change must be skipped
-     */
-    #translateEffectKey(change) {
-        if ( !hasEffectTable(this.type) || !change.key.startsWith("system.") ) return true;
-        const resolved = resolveEffectKey(this.type, change.key);
-        if ( "skip" in resolved ) {
-            warnOnce(`skip:${change.effect.name}:${change.key}`, `SR6E | the effect "${change.effect.name}" changes ${change.key}, which has no equivalent on a ${this.type} and was skipped`);
-            return false;
-        }
-        change.key = resolved.key;
-        return true;
     }
 
     /**
@@ -383,7 +366,7 @@ export default class Shadowrun6Actor extends Actor {
         for ( const change of changes ) {
             // V2 actors only: translate or skip the key on this in-memory clone (nothing is persisted), and never let one effect
             // break preparation (design Decision 5b)
-            if ( isV2 && !this.#translateEffectKey(change) ) continue;
+            if ( isV2 && !translateChangeKey(this.type, change) ) continue;
             const replacementData = dataByEffect.get(change.effect) ?? rollData;
             const result = isV2
                 ? safeApply(() => ActiveEffect.applyChange(this, change, {replacementData}), change.effect.name)
