@@ -56,6 +56,20 @@ export function setPath(obj, path, value) {
     cur[keys.at(-1)] = value;
 }
 
+/**
+ * Remove a key from an object, even a sealed one. Foundry seals a document's `_source` and may feed that same sealed object
+ * back through `migrateData` (reset, updateSource), where `delete` throws in strict mode; an existing key is still
+ * writable, so it is set to undefined, which cleaning and serialising treat as absent. A frozen object can't change at all:
+ * it is left as is.
+ * @param {object} obj
+ * @param {string} key
+ */
+export function removeKey(obj, key) {
+    if (!(key in obj) || Object.isFrozen(obj)) return;
+    if (Object.isSealed(obj)) obj[key] = undefined;
+    else delete obj[key];
+}
+
 /** Delete a dotted path and prune the plain objects it leaves empty. */
 export function deletePath(obj, path) {
     const keys = path.split(".");
@@ -66,10 +80,10 @@ export function deletePath(obj, path) {
         cur = cur[key];
         chain.push(cur);
     }
-    delete cur[keys.at(-1)];
+    removeKey(cur, keys.at(-1));
     for (let i = chain.length - 1; i > 0; i--) {
-        if (Object.keys(chain[i]).length) break;
-        delete chain[i - 1][keys[i - 1]];
+        if (Object.keys(chain[i]).filter((k) => chain[i][k] !== undefined).length) break;
+        removeKey(chain[i - 1], keys[i - 1]);
     }
 }
 

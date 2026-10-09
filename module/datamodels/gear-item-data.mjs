@@ -1,5 +1,6 @@
 import SR6GenesisItemData, { genesisItemSchema } from "./genesis-item-data.mjs";
 import { sanitizeNumbers, sanitizeObjects } from "./legacy-item-sanitizers.mjs";
+import { removeKey } from "../migrations/v2/table.mjs";
 
 /** Schema of the `gear` item type; module-level so checkJs can type the model from it. */
 export function gearItemSchema() {
@@ -120,6 +121,7 @@ export default class SR6GearItemData extends SR6GenesisItemData {
 
     /** @inheritDoc */
     static migrateData(source) {
+        if (Object.isFrozen(source)) return super.migrateData(source); // can't change a frozen source
         // Nested objects first, so the coercions below can rely on them being objects
         sanitizeObjects(this, source, ["matrix", "modes", "vehicle"]);
 
@@ -128,7 +130,7 @@ export default class SR6GearItemData extends SR6GenesisItemData {
         if (source.devRating !== undefined) {
             source.matrix ??= {};
             source.matrix.deviceRating = parseInt(source.devRating) || 2;
-            delete source.devRating
+            removeKey(source, "devRating");
         }
 
         if (typeof source.stun === 'string') source.stun = (source.stun === "true");

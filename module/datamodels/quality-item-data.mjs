@@ -24,7 +24,7 @@ export default class SR6QualityItemData extends SR6GenesisItemData {
     /** @inheritDoc */
     static migrateData(source) {
         this._sanitizeNumbers(source, ["value", "level"]);
-        if ("modifier" in source && !Array.isArray(source.modifier)) source.modifier = [];
+        if ("modifier" in source && !Array.isArray(source.modifier) && !Object.isFrozen(source)) source.modifier = [];
         return super.migrateData(source);
     }
 }
