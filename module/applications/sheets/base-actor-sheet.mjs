@@ -753,9 +753,10 @@ export default class SR6BaseActorSheet extends api.HandlebarsApplicationMixin(
         if (!coin.classList.contains("clickable")) return;
         
         const isRightClick = event.button === 2 || event.which === 3;
-        const oldEdge = this.actor.system.attributes.edge.current;
+        const edge = this.actor.system.edge;
+        const oldEdge = edge.current;
 
-        if ((isRightClick && oldEdge <= 0) || (!isRightClick && oldEdge >= 7)) {
+        if ((isRightClick && oldEdge <= 0) || (!isRightClick && oldEdge >= edge.pool)) {
             coin.classList.add("edge-coin--error");
             coin.addEventListener("animationend", () => {
                 coin.classList.remove("edge-coin--error");
@@ -775,7 +776,7 @@ export default class SR6BaseActorSheet extends api.HandlebarsApplicationMixin(
 
         setTimeout(async () => {
             requestAnimationFrame(async () => {
-                await this.actor.update({ "system.attributes.edge.current": newEdge });
+                await this.actor.update({ "system.edge.current": newEdge });
             });
         }, 600);
 
@@ -949,7 +950,7 @@ export default class SR6BaseActorSheet extends api.HandlebarsApplicationMixin(
                 if (item) return item.roll();
             case "skill":
                 rollConfig = new game.sr6.rollTypes.SkillRoll(this.actor.system, dataset.skill);
-                if (dataset.skillSpec) rollConfig.skillSpec = dataset.skillspec;
+                if (dataset.skillSpec) rollConfig.skillSpec = dataset.skillSpec;
                 if (dataset.threshold) rollConfig.threshold = dataset.threshold;
                 if (dataset.attrib) rollConfig.attrib = dataset.attrib;
                 console.log("SR6E | onRollSkillCheck before ", rollConfig);
