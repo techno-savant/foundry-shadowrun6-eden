@@ -41,10 +41,11 @@ export default class SR6SoftwareItemData extends SR6ModItemData {
     /** @inheritDoc */
     static migrateData(source) {
         const typeOptions = this.TYPES;
-        if (!Object.hasOwn(typeOptions, source.type)) source.type = undefined;
+        // only an existing key can be reassigned on a sealed source; an absent key already reads as undefined
+        if ("type" in source && !Object.isFrozen(source) && !Object.hasOwn(typeOptions, source.type)) source.type = undefined;
         
         const subtypeOptions = this.SUBTYPES;
-        if (!Object.hasOwn(subtypeOptions, source.subtype)) source.subtype = undefined;
+        if ("subtype" in source && !Object.isFrozen(source) && !Object.hasOwn(subtypeOptions, source.subtype)) source.subtype = undefined;
 
         return super.migrateData(source);
     }

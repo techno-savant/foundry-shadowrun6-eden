@@ -1,4 +1,5 @@
 import { sanitizeDescription, sanitizeNumbers } from "./legacy-item-sanitizers.mjs";
+import { removeKey } from "../migrations/v2/table.mjs";
 
 /** Schema of the `contact` item type; module-level so checkJs can type the model from it. */
 export function contactItemSchema() {
@@ -25,9 +26,11 @@ export default class SR6ContactItemData extends foundry.abstract.TypeDataModel {
     /** @inheritDoc */
     static migrateData(source) {
         // Repair the "loyality" typo of Eden's own contact sheet input (v2-key-mapping.md rename rule).
-        if ("loyality" in source) {
-            if (!("loyalty" in source)) source.loyalty = source.loyality;
-            delete source.loyality;
+        if ("loyality" in source && !Object.isFrozen(source)) {
+            // A sealed or frozen source (an initialised document's _source) is already cleaned, so it can't hold "loyality"; if one
+            // ever does, a key can't be added to it, and the typo is left alone rather than dropping the value
+            if (!("loyalty" in source) && Object.isExtensible(source)) source.loyalty = source.loyality;
+            if ("loyalty" in source) removeKey(source, "loyality");
         }
         sanitizeDescription(source);
         sanitizeNumbers(this, source, ["rating", "loyalty", "favors"]);
