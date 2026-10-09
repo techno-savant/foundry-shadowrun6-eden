@@ -181,11 +181,16 @@ export class SkillSpecializationField extends fields.StringField {
      * @protected
      */
     _isValidChoice(value) {
-        if (this.name !== "specializations" && this.name !== "expertise") {
+        // Foundry 13 names the element of a TypedObjectField "element" (common/data/fields.mjs:1524, `element.name ||= "element"`),
+        // and parents it to the TypedObjectField, which is the field called "specializations". So every entry of
+        // `specializations` has this.name "element" and the skill one level further up; only `expertise` is named directly.
+        const isEntry = this.name === "element" && this.parent?.name === "specializations";
+        if (!isEntry && this.name !== "specializations" && this.name !== "expertise") {
             throw new Error(`SkillSpecializationField must only be used with the system name "specializations" or "expertise"`);
         }
-        if (this.parent.name) {
-            let choices = CONFIG.SR6.skill_special[this.parent.name];
+        const skill = isEntry ? this.parent.parent : this.parent;
+        if (skill?.name) {
+            let choices = CONFIG.SR6.skill_special[skill.name];
             if (Object.hasOwn(choices, value)) return true;
             else throw new Error(`is not a valid skill specialization for the SR6SkillData class`);
         }
