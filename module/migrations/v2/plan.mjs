@@ -59,27 +59,51 @@ export function buildEffectKeyMap(table, conversion = {}) {
 }
 
 /**
- * Plan one effect: rewrite `changes[].key` through the map and keep the originals in flags.<scope>.v1Changes.
+ * Where an effect's changes live in the plain object. Foundry 14 stores them in `system.changes`; 13 in `changes`. The shape is read
+ * from the object, not the release: a delta effect can be stored in either shape on either release. When both arrays exist
+ * `system.changes` wins (14 treats the root one as an alias of it). `toObject()` on 14 drops the root alias (it is non-enumerable),
+ * so reading `changes` alone sees an empty effect.
+ * @param {object} effectData
+ * @returns {{shape: "system"|"root", list: object[]}}
+ */
+export function changesOf(effectData) {
+    if (Array.isArray(effectData.system?.changes)) return { shape: "system", list: effectData.system.changes };
+    return { shape: "root", list: effectData.changes ?? [] };
+}
+
+/**
+ * Plan one effect: rewrite `changes[].key` through the map and keep the originals in flags.<scope>.v1Changes (as read) with
+ * flags.<scope>.v1ChangesShape ("system" or "root") so rollback restores them to the shape they came from. The update is
+ * written in the shape that was read: `system.changes` for the 14 shape, `changes` for the 13 shape.
  * @returns {{update: Record<string, any>}|null}   null when nothing changes
  */
 export function planEffect(effectData, keyMap) {
-    const changes = effectData.changes ?? [];
+    const { shape, list: changes } = changesOf(effectData);
     const moved = (key) => typeof keyMap[key] === "string" && keyMap[key] !== key;
     for (const change of changes) {
         if (keyMap[change.key] === null) console.warn(`SR6E | v2 migration: effect "${effectData.name}" changes ${change.key}, which has no V2 target; left as is`);
     }
     if (!changes.some((c) => moved(c.key))) return null;
-    const update = { changes: changes.map((c) => ({ ...c, key: moved(c.key) ? keyMap[c.key] : c.key })) };
-    if (!hasPath(effectData.flags ?? {}, `${FLAG_SCOPE}.v1Changes`)) update[`flags.${FLAG_SCOPE}.v1Changes`] = structuredClone(changes);
+    /** @type {Record<string, any>} */
+    const update = { [shape === "system" ? "system.changes" : "changes"]: changes.map((c) => ({ ...c, key: moved(c.key) ? keyMap[c.key] : c.key })) };
+    if (!hasPath(effectData.flags ?? {}, `${FLAG_SCOPE}.v1Changes`)) {
+        update[`flags.${FLAG_SCOPE}.v1Changes`] = structuredClone(changes);
+        update[`flags.${FLAG_SCOPE}.v1ChangesShape`] = shape;
+    }
     return { update };
 }
 
-/** Apply a planEffect result to a full effect object (delta effects are replaced whole, not updated by path). */
+/** Apply a planEffect result to a full effect object (delta effects are replaced whole, not updated by path). Never adds the other shape. */
 function withEffectPlan(effect, plan) {
     const out = structuredClone(effect);
-    out.changes = plan.update.changes;
-    const v1 = plan.update[`flags.${FLAG_SCOPE}.v1Changes`];
-    if (v1) setPath(out, `flags.${FLAG_SCOPE}.v1Changes`, v1);
+    if ("system.changes" in plan.update) {
+        out.system ??= {};
+        out.system.changes = plan.update["system.changes"];
+    } else out.changes = plan.update.changes;
+    for (const leaf of ["v1Changes", "v1ChangesShape"]) {
+        const value = plan.update[`flags.${FLAG_SCOPE}.${leaf}`];
+        if (value !== undefined) setPath(out, `flags.${FLAG_SCOPE}.${leaf}`, value);
+    }
     return out;
 }
 

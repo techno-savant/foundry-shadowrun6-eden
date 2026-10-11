@@ -1,7 +1,16 @@
 import { FLAG_SCOPE, getPath } from "./table.mjs";
+import { changesOf } from "./plan.mjs";
+
+/** The shape to restore an effect's original changes into: the recorded one, else the one it has now. */
+function restoreShape(effectData) {
+    const recorded = getPath(effectData.flags ?? {}, `${FLAG_SCOPE}.v1ChangesShape`);
+    return recorded === "system" || recorded === "root" ? recorded : changesOf(effectData).shape;
+}
 
 /**
- * Restore what the V2 migration rewrote and kept a copy of: effect `changes` (flags.<scope>.v1Changes) and token
+ * Restore what the V2 migration rewrote and kept a copy of: effect `changes` (flags.<scope>.v1Changes, in the shape recorded in
+ * flags.<scope>.v1ChangesShape: "system" for Foundry 14's system.changes, "root" for 13's changes; a record without the flag
+ * is restored to the shape the effect has now) and token
  * bars (flags.<scope>.v1Bars), for every world actor of `type`, its embedded effects, prototype token and scene tokens.
  * Actor data itself rolls back by reverting the code, because the old keys are never deleted. Edits made after
  * migration don't carry back.
@@ -17,7 +26,7 @@ export async function rollbackV2(type) {
         const updates = [];
         for (const effect of owner.effects) {
             const changes = getPath(effect.flags ?? {}, `${FLAG_SCOPE}.v1Changes`);
-            if (changes) updates.push({ _id: effect.id, changes });
+            if (changes) updates.push({ _id: effect.id, ...(restoreShape(effect.toObject()) === "system" ? { "system.changes": changes } : { changes }) });
         }
         if (updates.length) await owner.effects.documentClass.updateDocuments(updates, { parent: owner });
         effects += updates.length;
@@ -44,6 +53,7 @@ export async function rollbackV2(type) {
             const changes = getPath(effect.flags ?? {}, `${FLAG_SCOPE}.v1Changes`);
             if (!changes) return effect;
             changed = true;
+            if (restoreShape(effect) === "system") return { ...effect, system: { ...(effect.system ?? {}), changes } };
             return { ...effect, changes };
         });
         return changed ? out : null;
