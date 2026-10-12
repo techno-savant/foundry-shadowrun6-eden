@@ -2,6 +2,7 @@ import { RollDialog } from "./applications/RollDialog.js";
 import SR6Roll from "./SR6Roll.js";
 import { ConfiguredRoll, ReallyRoll, RollType } from "./dice/RollTypes.js";
 import { SYSTEM_NAME } from "./constants.js";
+import { edgeUpdate } from "./util/edge.mjs";
 function isLifeform(obj) {
     return obj.attributes != undefined;
 }
@@ -246,7 +247,7 @@ async function _dialogClosed(type, form, prepared, dialog, configured) {
     if (configured.actor && configured.edgePlayer > 0) {
         console.log("SR6E | Actor " + configured.actor.name + " " + configured.actor._id + " gets " + configured.edgePlayer + " Edge");
         prepared.edge = getSystemData(configured.actor).edge.value + configured.edgePlayer;
-        await configured.actor.update({ ["system.edge.value"]: prepared.edge });
+        await configured.actor.update(edgeUpdate(configured.actor, prepared.edge));
         let combat = game.combat;
         if (combat) {
             console.log("SR6E | In combat: mark edge gained in combatant " + configured.edgePlayer + " Edge");
@@ -278,7 +279,7 @@ async function _dialogClosed(type, form, prepared, dialog, configured) {
                         system.edge.value = prepared.edge - action.cost;
                         // Pay Edge cost
                         console.log("SR6E | Update Edge to " + (prepared.edge - action.cost));
-                        await prepared.actor.update({ ["system.edge.value"]: system.edge.value });
+                        await prepared.actor.update(edgeUpdate(prepared.actor, system.edge.value));
                     }
                 }
                 else {
@@ -287,13 +288,13 @@ async function _dialogClosed(type, form, prepared, dialog, configured) {
                     system.edge.value = prepared.edge - boost.cost;
                     // Pay Edge cost
                     console.log("SR6E | Update Edge to " + (prepared.edge - boost.cost));
-                    await prepared.actor.update({ ["system.edge.value"]: system.edge.value });
+                    await prepared.actor.update(edgeUpdate(prepared.actor, system.edge.value));
                 }
             }
             else {
                 if (prepared.edge > 0) {
                     console.log("SR6E | Update Edge to " + prepared.edge);
-                    await prepared.actor.update({ ["system.edge.value"]: prepared.edge });
+                    await prepared.actor.update(edgeUpdate(prepared.actor, prepared.edge));
                 }
             }
         }

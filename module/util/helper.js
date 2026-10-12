@@ -1,3 +1,4 @@
+import { edgeUpdate } from "./edge.mjs";
 function isLifeform(obj) {
     return obj.attributes != undefined;
 }
@@ -847,11 +848,11 @@ export async function resetEdge() {
     if ( proceed ) {
         console.info("SR6E | Resetting Edge for all Actors in Actor tab, and all selected tokens");
         game.actors.forEach(async (actor) => {
-            await actor.update({'system.edge.value': actor.system.edge.max});
+            await actor.update(edgeUpdate(actor, actor.system.edge.max));
         });
         // or all tokens on scene? canvas.tokens.ownedTokens
         canvas.tokens.controlled.forEach(async (token) => {
-            await token.actor.update({'system.edge.value': token.actor.system.edge.max});
+            await token.actor.update(edgeUpdate(token.actor, token.actor.system.edge.max));
         });
         const msg = game.i18n.localize("shadowrun6.ui.notifications.edge_has_been_reset");
         await ChatMessage.create({

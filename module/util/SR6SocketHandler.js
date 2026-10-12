@@ -1,3 +1,4 @@
+import { edgeUpdate } from "./edge.mjs";
 export default class SR6SocketHandler {
     identifier = "system.shadowrun6-eden";
 
@@ -68,6 +69,6 @@ export default class SR6SocketHandler {
         console.log('SR6 | Socket processing | gmUpdatesEdge data', data);
         const targetActor = await fromUuid(data.targetUuid);
         const newEdge = Math.max(0, Math.min(7, targetActor.system.edge.value + data.edgeModifier ));
-        await targetActor.update({'system.edge.value': newEdge});
+        await targetActor.update(edgeUpdate(targetActor, newEdge));
     }
 }
