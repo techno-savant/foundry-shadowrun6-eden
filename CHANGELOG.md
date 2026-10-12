@@ -5,6 +5,7 @@
 
 ### Data Updates
 - Critter V2 actor switch: this was live-tested on Foundry 14.369 only. Foundry 13 is not live-tested yet and must be checked before any release that claims Foundry 13 support.
+- Worlds without any Critter no longer show the backup and conversion dialog and are not marked as converted. A Critter added later (for example imported) is still offered the conversion.
 - Critters use the new format as soon as this version loads. The first time a GM opens a world with it, a dialog ("Convert now" / "Ask me next time") asks them to back up the world, then moves the Critters' active effects (including effects and items that exist only on one unlinked token), token resource bars and unlinked tokens' damage to the new keys. The old values are kept. If the conversion stops part-way, a message says so, nothing is lost, and you are asked again next time. To undo it, run the macro `game.sr6.migrations.rollbackV2('Critter')` before going back to the previous version: it restores the effect keys and token bars. Changes made to Critters after the conversion do not carry back.
 - On Foundry 14 the conversion also moves the keys of Critters' active effects, which Foundry 14 stores in a different place than 13. The original keys are kept, and `game.sr6.migrations.rollbackV2('Critter')` restores them where they were.
 - Effects that change a Critter's physical or stun monitor (for example Build Tough and Glass Jaw) work on Critters, whichever way the effect reached them, including items given to a Critter later.
