@@ -15,13 +15,16 @@ export const MIGRATION_ID = "v2-actors-1";
 
 /**
  * Run the legacy -> V2 world migration for the enabled actor types. GM only, once per world per migration id, behind
- * a backup prompt. With no enabled types it returns immediately and touches nothing.
+ * a backup prompt. With no enabled types, or no world actor of one, it returns immediately and touches nothing.
  * @returns {Promise<{ran: boolean, reason?: string, error?: unknown}>}
  */
 export async function maybeRunV2Migration() {
     if (!ENABLED_TYPES.length) return { ran: false, reason: "no enabled types" };
     if (!game.user?.isGM) return { ran: false, reason: "not a GM" };
     if (settings().get(SYSTEM_NAME, "v2MigrationId") === MIGRATION_ID) return { ran: false, reason: "already migrated" };
+    // Nothing to convert: ask nothing and record nothing, so a legacy actor imported later is still offered the conversion.
+    // Prototype tokens, unlinked token deltas and embedded effects all belong to a world actor of an enabled type.
+    if (!game.actors.some((actor) => ENABLED_TYPES.includes(actor.type))) return { ran: false, reason: "nothing to migrate" };
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: game.i18n.localize("SR6.Migration.V2.backupTitle") },
