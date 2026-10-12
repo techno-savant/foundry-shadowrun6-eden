@@ -17,6 +17,7 @@
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ### Bug Fixes
+- The Magic cell of the Critter sheet is no longer empty in edit mode on Foundry 14.
 - Fix the Edge coin on Sprite and Host sheets, which read and wrote the wrong field.
 
 ## 4.0.9

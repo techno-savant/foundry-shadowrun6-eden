@@ -99,6 +99,16 @@ class SR6CritterZeroRankAttributeField extends foundry.data.fields.EmbeddedDataF
     constructor(options = {}, context = {}) {
         super(SR6CritterZeroRankAttributeData, options, context);
     }
+
+    /**
+     * An embedded field has no input of its own, and the Critter sheet's statblock passes the whole attribute field to formInput
+     * (the Magic cell). Like upstream's SR6AttributeField, refer to its rank.
+     * @param {any} config   Form element configuration parameters
+     * @returns {HTMLElement|HTMLCollection}   A rendered HTMLElement for the field
+     */
+    _toInput(config) {
+        return /** @type {any} */ (this).fields.rank._toInput(config);
+    }
 }
 
 /**
