@@ -33,6 +33,7 @@ import * as documents from "./documents/_module.mjs";
 import * as applications from "./applications/_module.mjs";
 import * as rollTypes from "./dice/RollTypes.js";
 import * as migrations from "./migrations/v2/index.mjs";
+import { edgeTooltipMode } from "./util/chat-edge.mjs";
 import { schemaDeclares } from "./migrations/v2/schema-paths.mjs";
 
 /**
@@ -817,20 +818,18 @@ Hooks.once("init", async function () {
                 const chatMsg = game.messages.get( event.currentTarget.closest("[data-message-id]").dataset.messageId );
                 const chatSpeakerActor = game.sr6.utils.getActor(chatMsg.speaker.actor, chatMsg.speaker.scene, chatMsg.speaker.token);
                 let selectedActor;
-                
+                // Cards that other modules copy from Eden's markup are plain messages without rolls: open the tooltip, offer no Edge
+                const firstRoll = chatMsg.rolls?.[0];
+
                 // Don't do edge boosts when its an extended test (complicated implementation & only for riggers)
-                if (!chatMsg.rolls[0].configured.extended) {
+                if (firstRoll && !firstRoll.configured?.extended) {
                     selectedActor = game.sr6.utils.getSelectedActor();
                 }
                 chatMsg.edgeTooltipUsedBy = selectedActor?.uuid;
-                
-                if (chatSpeakerActor?.uuid === selectedActor?.uuid && selectedActor?.isOwner) {
-                    if (!chatMsg.rolls[0]?.finished.edge_use)
-                        tip.addClass("edgeable edge-own-roll");
-                } else if (chatSpeakerActor?.uuid !== selectedActor?.uuid && selectedActor?.isOwner) {
-                    if (!chatMsg.rolls[0]?.finished.edge_use_opponent)
-                        tip.addClass("edgeable edge-opponent-roll");
-                }
+
+                const edgeMode = edgeTooltipMode(firstRoll, chatSpeakerActor, selectedActor);
+                if (edgeMode === "own") tip.addClass("edgeable edge-own-roll");
+                else if (edgeMode === "opponent") tip.addClass("edgeable edge-opponent-roll");
                 tip.slideDown(200);
             }
             else {
