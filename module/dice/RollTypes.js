@@ -342,7 +342,7 @@ export class SpellRoll extends SkillRoll {
             if (this.defendWith === Defense.SPELL_DIRECT) {
                 this.calcDamage = 0 + this.ampUp;
             } else if (this.defendWith === Defense.SPELL_INDIRECT) {
-                this.calcDamage = Math.ceil(this.actor.system.attributes.mag.pool / 2) + this.ampUp;
+                this.calcDamage = Math.ceil(this.actor.getSystemProperty("attributes.mag.pool") / 2) + this.ampUp;
             }
         }
         console.log("SR6E | Spell Damage calculated: " + this.calcDamage);

@@ -4,6 +4,17 @@ import { SpritePowerRoll, WeaponRoll } from "../dice/RollTypes.js";
 import { SR6ConditionMonitorField } from "../datamodels/fields/fields.mjs";
 
 /**
+ * An attribute pool by its legacy id ("str", "agi", "rea"), for legacy actors and V2 actors (Critter) alike: the actor's
+ * getSystemProperty maps the legacy path to the V2 attribute name (CONFIG.SR6.SYSTEMPATH_TO_V2).
+ * @param {any} actor
+ * @param {string} id
+ * @returns {number}
+ */
+function attributePool(actor, id) {
+  return /** @type {number} */ (actor.getSystemProperty(`attributes.${id}.pool`));
+}
+
+/**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
@@ -327,15 +338,15 @@ export default class SR6Item extends Item {
     const attackRating = foundry.utils.deepClone(/** @type {SR6GearSystem} */ (this.system).attackRating);
 
     if (/** @type {SR6GearSystem} */ (this.system).skill === "close_combat" || /** @type {SR6GearSystem} */ (this.system).skillSpec === "brawling" || /** @type {SR6GearSystem} */ (this.system).skillSpec === "whips") {
-      let closeCombatAttackRatingAttribute = this.actor.system.attributes.str.pool;
+      let closeCombatAttackRatingAttribute = attributePool(this.actor, "str");
       if (/** @type {SR6GearSystem} */ (this.system).skillSpec === "whips") {
-        closeCombatAttackRatingAttribute = this.actor.system.attributes.rea.pool;
+        closeCombatAttackRatingAttribute = attributePool(this.actor, "rea");
       }
       if (game.settings.get(SYSTEM_NAME, "rollStrengthCombat") && /** @type {SR6GearSystem} */ (this.system).strWeapon === true) {
-        closeCombatAttackRatingAttribute = this.actor.system.attributes.agi.pool;
+        closeCombatAttackRatingAttribute = attributePool(this.actor, "agi");
       }
       if (parseInt(/** @type {SR6GearSystem} */ (this.system).attackRating[0]) === 0 && /** @type {SR6GearSystem} */ (this.system).skill === "close_combat" && /** @type {SR6GearSystem} */ (this.system).skillSpec === "unarmed") {
-        closeCombatAttackRatingAttribute += this.actor.system.attributes.rea.pool;
+        closeCombatAttackRatingAttribute += attributePool(this.actor, "rea");
       }
       attackRating[0] = parseInt(/** @type {SR6GearSystem} */ (this.system).attackRating[0]) + parseInt(closeCombatAttackRatingAttribute);
     }
@@ -394,8 +405,8 @@ export default class SR6Item extends Item {
 
     if (/** @type {SR6GearSystem} */ (this.system).skill === "close_combat" || /** @type {SR6GearSystem} */ (this.system).skillSpec === "brawling") {
       if (game.settings.get(SYSTEM_NAME, "highStrengthAddsDamage")) {
-        dmg += ( this.actor.system.attributes.str.pool >= 7 ) ? 1 : 0;
-        dmg += ( this.actor.system.attributes.str.pool >= 10 ) ? 1 : 0;
+        dmg += ( attributePool(this.actor, "str") >= 7 ) ? 1 : 0;
+        dmg += ( attributePool(this.actor, "str") >= 10 ) ? 1 : 0;
       }
     }
 

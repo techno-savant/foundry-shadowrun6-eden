@@ -17,6 +17,7 @@
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ### Bug Fixes
+- Clicking the roll die on a melee weapon of a Critter (and Critter melee attack rating, damage bonus and indirect combat spell damage) no longer fails on Foundry 14.
 - The Magic cell of the Critter sheet is no longer empty in edit mode on Foundry 14.
 - Fix the Edge coin on Sprite and Host sheets, which read and wrote the wrong field.
 
