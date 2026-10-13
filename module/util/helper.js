@@ -614,20 +614,25 @@ export function rollText(classList, rollId, skillSpec) {
     return actionText;
 }
 
+/**
+ * Resolve the actor of a chat speaker or a stored reference: the token's actor (which for an unlinked token is the token's own
+ * synthetic actor) when scene and token are given and still exist, otherwise the world actor with that id. A card whose token
+ * was deleted, or whose token id is not on that scene (a spirit that was never placed), still resolves to the world actor.
+ * @param {string} [actorId]
+ * @param {string} [sceneId]
+ * @param {string} [tokenId]
+ * @returns {Actor|null}
+ */
 export function getActor(actorId, sceneId, tokenId) {
     let actor = null;
-    if (actorId && sceneId && tokenId) {
+    if (sceneId && tokenId) {
         console.debug("SR6E | Target is a token");
-        // If scene and token ID is given, resolve token
-        const scene = game.scenes.get(sceneId);
-        if (scene) {
-            const token = scene.tokens.get(tokenId);
-            console.log("SR6E | Token ", token);
-            actor = token.actor;
-        }
-    } else if (actorId) {
-        console.debug("SR6E | Target isn't a token but actorId is known");
-        actor = game.actors.get(actorId);
+        const token = game.scenes.get(sceneId)?.tokens.get(tokenId);
+        actor = token?.actor ?? null;
+    }
+    if (!actor && actorId) {
+        console.debug("SR6E | No usable token, resolving the world actor");
+        actor = game.actors.get(actorId) ?? null;
     }
 
     return actor;

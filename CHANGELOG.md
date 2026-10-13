@@ -19,6 +19,7 @@
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ### Bug Fixes
+- Fix clicking the dice of a roll card throwing an error when the token that rolled it has since been deleted (or is not on the card's scene). The card now falls back to the actor.
 - Fix clicking the dice header of a chat card that has no roll (for example cards posted by other modules that copy Eden's chat markup) throwing an error.
 - Fix the Edge coin on Sprite and Host sheets, which read and wrote the wrong field.
 - Edge gained or spent in a roll, given to a target, or reset is now saved on Sprites and Hosts too (their Edge is stored under a different name than on older actors).
