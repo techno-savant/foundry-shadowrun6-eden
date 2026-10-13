@@ -1657,10 +1657,11 @@ export default class Shadowrun6Actor extends Actor {
                     modRig = " + " + game.i18n.localize("shadowrun6.item.vehicle.rigRating.long") + " (" + rigRating + ")";
                 }
                 switch (opMode) {
+                    // The control rig rating is a Jumped in (VR) benefit (Core Rulebook p.283), so manual and AR do not get it
                     case "manual":
+                    case "riggedAR":
                         rigRating = 0;
                         modRig = "";
-                    case "riggedAR":
                         current.ar.pool = system.skills.piloting.points + vehicleData.sen + +rigRating;
                         current.ar.modString =
                             game.i18n.localize("skill.piloting") +
