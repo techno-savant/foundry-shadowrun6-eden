@@ -19,6 +19,7 @@
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ### Bug Fixes
+- Fix an error on every token that has no actor (for example the device and IC icons that Matrix modules place on a scene) when the "Tokens Read Only & Matrix Sheets" setting is on: such tokens are now skipped instead of throwing in the token creation hook.
 - Fix Matrix actions and attribute rolls throwing an error for an actor that has no access device (for example an NPC that is not a decker): they now roll without a Matrix damage penalty.
 - A vehicle carried as an item no longer gets the control rig rating in Jumped in (AR) mode: the rating applies when jumped in with VR, as in the rules.
 - Fix clicking the dice of a roll card throwing an error when the token that rolled it has since been deleted (or is not on the card's scene). The card now falls back to the actor.
