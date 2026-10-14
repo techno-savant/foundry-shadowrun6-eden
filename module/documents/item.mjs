@@ -667,12 +667,14 @@ export default class SR6Item extends Item {
       && changed.system?.matrix?.wirelessActive === undefined
     ) return;
 
-    const panAdmin = this.actor?.system.pan?.administrator;
+    const panAdmin = this.actor?.system?.pan?.administrator;
+    if (!panAdmin) return; // not in a PAN: no sheet to refresh
 
     const worldActors = game.actors.filter(actor => actor.prototypeToken.actorLink);
+    // game.actors.tokens can hold entries of deleted tokens (null, or an actor without system data)
     const tokenActors = Object.values(game.actors.tokens);
     const panActors = [...worldActors, ...tokenActors]
-      .filter(actor => actor.system.pan?.administrator.uuid === panAdmin.uuid);
+      .filter(actor => actor?.system?.pan?.administrator?.uuid === panAdmin.uuid);
 
     panActors.forEach(actor => actor.sheet?.render(false));
   }
