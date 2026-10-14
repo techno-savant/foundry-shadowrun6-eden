@@ -2228,7 +2228,7 @@ export default class Shadowrun6Actor extends Actor {
         if (isDataModel) return this.system.matrix?.matrixCM?.penalty ?? 0;
 
         const primaryAccessDevice = this.system.persona?.accessDevice;
-        return primaryAccessDevice.system.matrix?.matrixCM?.penalty ?? 0;
+        return primaryAccessDevice?.system?.matrix?.matrixCM?.penalty ?? 0;
     }
     //---------------------------------------------------------
     getSustainedModifier() {
