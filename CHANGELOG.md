@@ -19,6 +19,7 @@
 - Gear items now use a data model; unknown `system` fields on gear are no longer kept.
 
 ### Bug Fixes
+- A vehicle carried as an item now gets its attack and defense pools prepared again (Sensor, Armor and Piloting, plus the control rig rating when jumped in with VR); they were never prepared, so the carried vehicle's rolls had no pool.
 - Fix Matrix actions and attribute rolls throwing an error for an actor that has no access device (for example an NPC that is not a decker): they now roll without a Matrix damage penalty.
 - A vehicle carried as an item no longer gets the control rig rating in Jumped in (AR) mode: the rating applies when jumped in with VR, as in the rules.
 - Fix clicking the dice of a roll card throwing an error when the token that rolled it has since been deleted (or is not on the card's scene). The card now falls back to the actor.

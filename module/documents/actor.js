@@ -1623,7 +1623,8 @@ export default class Shadowrun6Actor extends Actor {
         }
         actorData.items.forEach((tmpItem) => {
             // Any kind of gear
-            if (tmpItem.type == "gear" && isVehicle(getSystemData(tmpItem))) {
+            // isVehicle is an Item getter (item.mjs), not a stored field of the gear data, so ask the item itself
+            if (tmpItem.type == "gear" && getSystemData(tmpItem).skill != undefined && tmpItem.isVehicle) {
                 let vehicleData = getSystemData(tmpItem);
                 if (!vehicleData.vehicle) {
                     vehicleData.vehicle = new CurrentVehicle();
