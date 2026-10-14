@@ -28,6 +28,7 @@
 - Edge gained or spent in a roll, given to a target, or reset is now saved on Sprites and Hosts too (their Edge is stored under a different name than on older actors).
 - Clicking the roll die on a melee weapon of a Critter (and Critter melee attack rating, damage bonus and indirect combat spell damage) no longer fails on Foundry 14.
 - The Magic cell of the Critter sheet is no longer empty in edit mode on Foundry 14.
+- Fix an error on every token that has no actor (for example the device and IC icons that Matrix modules place on a scene) when the "Tokens Read Only & Matrix Sheets" setting is on: such tokens are now skipped instead of throwing in the token creation hook.
 
 ## 4.0.9
 

@@ -931,6 +931,8 @@ Hooks.once("init", async function () {
      * After a token is created, check if we need to change Ownership rights
      */
     Hooks.on("createToken", (token, options, userId) => {
+        // Tokens without an actor (device icons, IC, scene tokens made by modules) have nothing to change the ownership of
+        if (!token.actor) return;
         const tokensLimitedOwnership = game.settings.get(SYSTEM_NAME, "tokensLimitedOwnership");
         if (!tokensLimitedOwnership) return;
 
